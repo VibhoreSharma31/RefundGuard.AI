@@ -1,0 +1,78 @@
+REFUNDGUARD.AI - NEW FEATURES: BEFORE vs NOW (short brief)
+=========================================================
+
+1) RBI TAT SLA / DEADLINE ENGINE  (High-impact #1 + Gap 1)
+-----------------------------------------------------------
+BEFORE: Any refund that the gateway said was "processed" but was not in the
+        latest bank file was marked "POTENTIAL_DELAY" immediately. It did not
+        check time or payment method, so a refund done 1 minute ago was
+        already "delayed". The "RBI TAT COMPLIANT" badge was just fixed text.
+
+NOW:    Every refund gets a real deadline when it is created:
+        deadline = end of day (T + N), T = day the refund started.
+          UPI / IMPS / NEFT / RTGS -> T+1
+          CARD / WALLET / NETBANKING -> T+5   (configurable)
+        The dashboard shows "Due in 3 days", "Due tomorrow" or
+        "Overdue by 2 days".
+        After the deadline: status SLA_BREACHED, a HIGH "SLA_BREACH" case,
+        days late, and estimated compensation (Rs 100/day by default).
+        The check runs automatically every 5 minutes.
+        When the bank money arrives, the case closes by itself and the app
+        records whether it was on time or late.
+
+2) UNKNOWN BANK CREDITS  (Gap 2)
+--------------------------------
+BEFORE: A bank settlement line with no matching refund (e.g. rfnd_ord5894)
+        was silently ignored - money could go missing unnoticed.
+NOW:    It opens a HIGH "UNMATCHED_SETTLEMENT" case with the amount, UTR,
+        bank and likely causes. It closes automatically if a match appears
+        later. A second credit for an already-settled refund opens a
+        "DUPLICATE_SETTLEMENT" case (possible double refund).
+
+3) WEBHOOK SIGNATURE CHECK  (Gap 4)
+-----------------------------------
+BEFORE: No real webhook endpoint. Anyone could call the API and mark a
+        refund as processed.
+NOW:    New endpoint POST /api/webhooks/razorpay. Every message must carry a
+        valid Razorpay HMAC-SHA256 signature made with the shared secret.
+        Fake or edited messages are rejected (401). With no secret set,
+        everything is rejected (safe default). Duplicate events are ignored.
+
+4) REAL AI ROOT-CAUSE ANALYSIS  (Gap 5)
+---------------------------------------
+BEFORE: The "AI hypothesis" was the same fixed sentence every time.
+NOW:    a) A smart rules engine uses the real numbers, e.g. "short by 2% =
+           gateway fee deducted", "exactly 50% = partial refund", "over-credit
+           = loss risk", "stuck at gateway vs. in transit at bank".
+           It also writes a ready-to-send message for the customer.
+        b) An "Analyze with AI" button sends the case facts to Claude
+           (claude-opus-5-5) for a deeper analysis. Customer name/email are
+           never sent. Needs ANTHROPIC_API_KEY; without it, the rules engine
+           is used.
+
+5) FAILED REFUNDS RAISE AN ALERT  (Gap 6)
+-----------------------------------------
+BEFORE: "refund.failed" only changed the status - nobody was alerted and the
+        customer stayed unpaid.
+NOW:    Opens a CRITICAL "REFUND_FAILED" case with the likely reason (closed
+        account, expired card...) and the steps to re-send the refund by
+        IMPS/NEFT. The SLA clock keeps running until the money arrives.
+
+SMALL FIXES
+-----------
+- Refund timeline showed "Invalid Date" -> fixed.
+- CSV hint said "settlement_amount" but the file needs "amount" -> fixed.
+- New-order toast showed "undefined" -> fixed.
+- A late webhook can no longer overwrite an already-settled refund.
+- App now runs on Indian time (IST) so deadlines are correct in Docker.
+
+NEW DEMO BUTTONS (Simulator Tools)
+----------------------------------
+- Time-travel refund (+days)   -> see an SLA breach without waiting
+- Simulate Refund FAILED       -> see the CRITICAL case
+- Test Signed Webhook          -> tampered = rejected, genuine = accepted
+- Run RBI TAT SLA Check
+
+NOTE: The Java code was not compiled on the machine where these changes were
+made (no Java there). Build with: docker compose up --build
+Full details: ENHANCEMENT_REPORT.md

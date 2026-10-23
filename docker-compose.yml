@@ -1,0 +1,62 @@
+version: '3.8'
+
+# Required variables live in a local .env file (copy .env.example -> .env). Nothing sensitive is hard-coded here.
+services:
+  # -------------------------------------------------------------
+  # 1. Oracle Free Database Container
+  # -------------------------------------------------------------
+  oracle-db:
+    image: gvenzl/oracle-free:latest
+    container_name: refundguard-oracle
+    restart: always
+    environment:
+      ORACLE_PASSWORD: ${RG_DB_PASSWORD:?Set RG_DB_PASSWORD in .env}
+      APP_USER: refundguard
+      APP_PASSWORD: ${RG_DB_PASSWORD:?Set RG_DB_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:1521:1521"   # bound to localhost only
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  # -------------------------------------------------------------
+  # 2. RefundGuard.AI Core Spring Boot Backend & UI Portal
+  # -------------------------------------------------------------
+  refundguard-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: refundguard-app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle-db:1521/FREEPDB1
+      SPRING_DATASOURCE_USERNAME: refundguard
+      SPRING_DATASOURCE_PASSWORD: ${RG_DB_PASSWORD:?Set RG_DB_PASSWORD in .env}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+      # Razorpay webhook signing secret (must match Razorpay Dashboard -> Webhooks). Empty = webhooks rejected (fail closed).
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      # Optional: enables Claude AI root-cause analysis. Leave empty for rule-based analysis only.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # RBAC bootstrap (first start only, while the user table is empty). Empty admin password => random one is logged once.
+      RG_ADMIN_USERNAME: ${RG_ADMIN_USERNAME:-admin}
+      RG_ADMIN_PASSWORD: ${RG_ADMIN_PASSWORD:-}
+      RG_OPERATOR_PASSWORD: ${RG_OPERATOR_PASSWORD:-}
+      RG_REVIEWER_PASSWORD: ${RG_REVIEWER_PASSWORD:-}
+      RG_SIMULATOR_ENABLED: ${RG_SIMULATOR_ENABLED:-true}
+      REFUNDGUARD_RISK_HOLD_MIN_SCORE: ${REFUNDGUARD_RISK_HOLD_MIN_SCORE:-50}
+      TZ: Asia/Kolkata
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+
+volumes:
+  oracle-data:
+    driver: local

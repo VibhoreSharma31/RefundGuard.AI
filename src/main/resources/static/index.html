@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RefundGuard.AI – Interbank Clearing &amp; Settlement Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-card: #1c2128;
+      --bg-card2: #21262d;
+      --border: #30363d;
+      --text-primary: #e6edf3;
+      --text-muted: #8b949e;
+      --text-dim: #6e7681;
+      --accent-blue: #388bfd;
+      --accent-green: #3fb950;
+      --accent-red: #f85149;
+      --accent-orange: #d29922;
+      --accent-yellow: #e3b341;
+    }
+    [data-theme="light"] {
+      --bg-primary: #f0f4f8;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card2: #f6f8fa;
+      --border: #d0d7de;
+      --text-primary: #24292f;
+      --text-muted: #57606a;
+      --text-dim: #8c959f;
+      --accent-blue: #0969da;
+      --accent-green: #1a7f37;
+      --accent-red: #cf222e;
+      --accent-orange: #9a6700;
+      --accent-yellow: #7d4e00;
+    }
+    * { box-sizing: border-box; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+    body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; min-height: 100vh; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; }
+    .card2 { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; }
+    .text-muted { color: var(--text-muted); }
+    .text-dim { color: var(--text-dim); }
+    .border-c { border-color: var(--border); }
+    /* Header */
+    .header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .logo-area { display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #388bfd, #0969da); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; flex-shrink: 0; }
+    .logo-text { font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px; }
+    .logo-text span { color: var(--accent-blue); }
+    .rbi-badge { background: linear-gradient(135deg, #1a7f37, #2ea043); color: white; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; white-space: nowrap; }
+    .logo-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+    .nav-btns { display: flex; align-items: center; gap: 8px; }
+    .nav-btn { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); white-space: nowrap; }
+    .nav-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+    .nav-btn.alert-btn { position: relative; }
+    .alert-count { position: absolute; top: -4px; right: -4px; background: var(--accent-red); color: white; font-size: 9px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .btn-api { background: #161b22; border-color: var(--border); }
+    .btn-reset { background: transparent; border-color: #f85149; color: #f85149; }
+    .btn-reset:hover { background: #f8514920; }
+    .btn-night { border-color: var(--border); }
+    .btn-signin { background: linear-gradient(135deg, #f89406, #e67e00); border: none; color: white; font-weight: 600; }
+    .btn-signin:hover { opacity: 0.9; color: white; }
+    .cutoff-badge { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+    /* Status Bar */
+    .status-bar { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 4px 20px; display: flex; align-items: center; gap: 16px; font-size: 11px; color: var(--text-muted); }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 4px; flex-shrink: 0; }
+    .dot-green { background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
+    .dot-blue { background: var(--accent-blue); box-shadow: 0 0 6px var(--accent-blue); }
+    .dot-orange { background: var(--accent-orange); box-shadow: 0 0 6px var(--accent-orange); }
+    .status-sep { color: var(--border); padding: 0 4px; }
+    .status-label { color: var(--text-dim); }
+    .status-val { color: var(--text-primary); font-weight: 500; }
+    /* Alert Banner */
+    .alert-banner { background: linear-gradient(135deg, #b35900 0%, #d4730a 40%, #c26010 100%); border-left: 4px solid #ff8c00; padding: 12px 20px; display: flex; align-items: center; gap: 16px; }
+    .alert-banner.hidden { display: none; }
+    .alert-badge { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,200,100,0.5); color: #ffd580; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; white-space: nowrap; }
+    .alert-title { font-weight: 700; font-size: 15px; color: white; }
+    .alert-sub { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+    .alert-order-badge { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #ffd580; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+    .alert-amount-badge { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #90ee90; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+    .alert-actions { display: flex; gap: 8px; margin-left: auto; flex-shrink: 0; }
+    .btn-disapprove { display: flex; align-items: center; gap: 5px; background: #c00; border: 1px solid #f00; color: white; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+    .btn-disapprove:hover { background: #e00; }
+    .btn-approve { display: flex; align-items: center; gap: 5px; background: #155724; border: 1px solid #2ea043; color: white; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+    .btn-approve:hover { background: #1a7f37; }
+    /* Main */
+    main { padding: 16px 20px; max-width: 1400px; margin: 0 auto; }
+    /* Metric Cards */
+    .metrics-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 1250px) { .metrics-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 900px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+    .sla-chip { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+    .sla-ON_TRACK { background: rgba(56,139,253,0.12); color: #388bfd; }
+    .sla-DUE_SOON { background: rgba(210,153,34,0.15); color: #d29922; }
+    .sla-BREACHED { background: rgba(248,81,73,0.15); color: #f85149; }
+    .sla-MET { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .sla-MET_LATE { background: rgba(210,153,34,0.15); color: #d29922; }
+    .sla-NOT_TRACKED, .sla-CLOSED { background: rgba(139,148,158,0.15); color: #8b949e; }
+    .policy-table td, .policy-table th { padding: 4px 8px; font-size: 11px; }
+    .metric-card { padding: 16px; position: relative; }
+    .metric-label { font-size: 10px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .metric-value { font-size: 36px; font-weight: 700; line-height: 1; color: var(--text-primary); }
+    .metric-sub { font-size: 11px; margin-top: 6px; }
+    .metric-warn { border-top: 2px solid var(--accent-orange); }
+    .metric-danger { border-top: 2px solid var(--accent-red); }
+    .metric-info { border-top: 2px solid var(--accent-blue); }
+    /* Observability Engine */
+    .obs-panel { background: #0d1117; border: 1px solid #21262d; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    [data-theme="light"] .obs-panel { background: #f6f8fa; border: 1px solid #d0d7de; }
+    .obs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+    .obs-title { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+    .obs-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .realtime-badge { background: linear-gradient(135deg, #1a7f37, #2ea043); color: white; font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 12px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
+    .pulse-dot { width: 6px; height: 6px; background: #90ff90; border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
+    .obs-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+    .obs-stat { text-align: center; }
+    .obs-stat-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 4px; }
+    .obs-stat-val { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+    .obs-stat-val.green { color: var(--accent-green); }
+    .obs-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .chart-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+    .chart-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .chart-desc { font-size: 10px; color: var(--text-dim); margin-bottom: 10px; }
+    .chart-main-val { font-size: 28px; font-weight: 700; }
+    .chart-main-val.green { color: var(--accent-green); }
+    .chart-main-val.red { color: var(--accent-red); }
+    .chart-delta { font-size: 11px; color: var(--accent-green); margin-left: 6px; }
+    .chart-delta.neg { color: var(--accent-red); }
+    .chart-bench { font-size: 10px; color: var(--text-dim); }
+    canvas { max-height: 70px; }
+    /* Sections */
+    .section-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    /* Table */
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: var(--bg-card2); color: var(--text-muted); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); position: sticky; top: 0; }
+    td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:hover td { background: var(--bg-card2); }
+    tr:last-child td { border-bottom: none; }
+    .status-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.3px; white-space: nowrap; }
+    .pill-green { background: rgba(63,185,80,0.15); color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
+    .pill-blue { background: rgba(56,139,253,0.15); color: #388bfd; border: 1px solid rgba(56,139,253,0.3); }
+    .pill-orange { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid rgba(210,153,34,0.3); }
+    .pill-red { background: rgba(248,81,73,0.15); color: #f85149; border: 1px solid rgba(248,81,73,0.3); }
+    .pill-gray { background: rgba(139,148,158,0.15); color: #8b949e; border: 1px solid rgba(139,148,158,0.3); }
+    /* Action buttons in tables */
+    .tbl-btn { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 5px; cursor: pointer; border: 1px solid; }
+    .tbl-btn-red { background: rgba(248,81,73,0.1); border-color: #f85149; color: #f85149; }
+    .tbl-btn-red:hover { background: rgba(248,81,73,0.25); }
+    .tbl-btn-blue { background: rgba(56,139,253,0.1); border-color: #388bfd; color: #388bfd; }
+    .tbl-btn-blue:hover { background: rgba(56,139,253,0.25); }
+    .tbl-btn-green { background: rgba(63,185,80,0.1); border-color: #3fb950; color: #3fb950; }
+    .tbl-btn-green:hover { background: rgba(63,185,80,0.25); }
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    .modal-overlay.hidden { display: none; }
+    .modal-box { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 520px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+    .form-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 4px; }
+    .form-input { width: 100%; padding: 8px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 13px; }
+    .form-input:focus { outline: none; border-color: var(--accent-blue); }
+    /* Timeline */
+    .timeline-item { display: flex; gap: 12px; padding-bottom: 16px; position: relative; }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-item:not(:last-child)::before { content: ''; position: absolute; left: 11px; top: 24px; bottom: 0; width: 2px; background: var(--border); }
+    .timeline-dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; border: 2px solid; }
+    /* Checkout Form */
+    .checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    /* Toast */
+    .toast { position: fixed; bottom: 20px; right: 20px; z-index: 2000; min-width: 280px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-size: 13px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    /* Grid helpers */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 768px) { .two-col, .three-col, .obs-charts, .obs-stats { grid-template-columns: 1fr; } }
+    /* CSV section */
+    .csv-zone { border: 2px dashed var(--border); border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+    .csv-zone:hover { border-color: var(--accent-blue); }
+    /* Scrollable table wrapper */
+    .table-wrap { overflow-x: auto; overflow-y: auto; max-height: 280px; border-radius: 8px; }
+    /* Hide scrollbar but allow scroll */
+    .table-wrap::-webkit-scrollbar { width: 4px; height: 4px; }
+    .table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    /* Reviewer dashboard (reuses the card / metric / table styles above) */
+    .rv-metrics { grid-template-columns: repeat(6, 1fr); }
+    @media (max-width: 1250px) { .rv-metrics { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 900px) { .rv-metrics { grid-template-columns: repeat(2, 1fr); } }
+    .rv-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-bottom: 10px; }
+    .rv-filters .form-input { padding: 6px 10px; font-size: 12px; }
+    .rv-queue-wrap { max-height: 460px; }
+    .modal-box.modal-wide { width: 960px; }
+    .kv { display: grid; grid-template-columns: 140px 1fr; gap: 4px 10px; font-size: 12px; }
+    .kv div:nth-child(odd) { color: var(--text-muted); }
+    .rv-panel { background: var(--bg-card2); padding: 12px; border-radius: 6px; margin-bottom: 10px; }
+    .rv-action-btn { font-size: 12px; padding: 7px 12px; }
+    .tbl-btn-orange { background: rgba(210,153,34,0.1); border-color: #d29922; color: #d29922; }
+    .tbl-btn-orange:hover { background: rgba(210,153,34,0.25); }
+    .tbl-btn-purple { background: rgba(137,87,229,0.1); border-color: #8957e5; color: #8957e5; }
+    .tbl-btn-purple:hover { background: rgba(137,87,229,0.25); }
+    .tbl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Admin risk analytics (reuses the card / metric / table styles above) */
+    .rk-bar-row { display: grid; grid-template-columns: 90px 1fr 70px; gap: 10px; align-items: center; font-size: 12px; margin-bottom: 8px; }
+    .rk-bar-track { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 4px; height: 14px; overflow: hidden; }
+    .rk-bar-fill { height: 100%; border-radius: 3px; }
+    .rk-pager { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+    .rk-evidence { font-size: 11px; color: var(--text-muted); }
+    .rk-evidence span { display: inline-block; margin-right: 10px; white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ HEADER ═══════════════════════════════════ -->
+<header class="header">
+  <div class="logo-area">
+    <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="logo-text">RefundGuard<span>.AI</span></span>
+        <span class="rbi-badge" id="rbiBadge">RBI TAT: CHECKING…</span>
+      </div>
+      <div class="logo-sub">Automated Interbank Clearing, Settlement &amp; Fraud Detection Portal</div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn alert-btn" onclick="scrollToAlerts()">
+      <i class="fa-solid fa-bell" style="color:#f89406;"></i> Review Queue
+      <span class="alert-count" id="alertCount">0</span>
+    </button>
+    <button class="nav-btn" data-perm="REVIEW_DECIDE" id="viewToggle" onclick="toggleView()"><i class="fa-solid fa-user-shield" style="color:#d29922;"></i> Reviewer Dashboard</button>
+    <button class="nav-btn" data-perm="RISK_ANALYTICS_VIEW" id="riskViewBtn" onclick="toggleRiskView()"><i class="fa-solid fa-chart-column" style="color:#8957e5;"></i> Risk Analytics</button>
+    <button class="nav-btn" onclick="showSupportModal()"><i class="fa-solid fa-headset" style="color:#3fb950;"></i> Support</button>
+    <button class="nav-btn btn-api"><i class="fa-solid fa-code" style="color:#388bfd;"></i> API</button>
+    <button class="nav-btn btn-reset" data-perm="SIMULATOR_RESET" onclick="resetDB()"><i class="fa-solid fa-arrows-rotate"></i> Reset DB</button>
+    <button class="nav-btn btn-night" onclick="toggleTheme()" id="themeBtn">
+      <i class="fa-solid fa-moon"></i> Night Theme
+    </button>
+    <span id="whoami" style="font-size:12px;color:var(--text-muted);display:none;"></span>
+    <button class="nav-btn btn-signin" id="authBtn" onclick="authButton()"><i class="fa-solid fa-user"></i> Sign In</button>
+    <span class="cutoff-badge"><i class="fa-regular fa-clock"></i> T+1 Bank Cut-Off: <strong id="cutoffTime">23:59 IST</strong></span>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════ STATUS BAR ═══════════════════════════════════ -->
+<div class="status-bar">
+  <span><span class="status-dot dot-green"></span><span class="status-label">CBS Node: </span><span class="status-val">Primary (Mumbai-DC-1)</span></span>
+  <span class="status-sep">|</span>
+  <span><span class="status-dot dot-blue"></span><span class="status-label">NPCI / IMPS Rail: </span><span class="status-val" style="color:#3fb950;">OPERATIONAL</span></span>
+  <span class="status-sep">|</span>
+  <span><span class="status-dot dot-green"></span><span class="status-label">Razorpay Mode: </span><span class="status-val" style="color:#388bfd;">CONNECTED</span></span>
+  <span class="status-sep">|</span>
+  <span><span class="status-dot dot-orange"></span><span class="status-label">RBI Compliance: </span><span class="status-val" id="rbiStatus" style="color:#d29922;">MONITORING</span></span>
+  <span class="status-sep">|</span>
+  <span><span class="status-dot dot-blue"></span><span class="status-label">AI Analysis: </span><span class="status-val" id="aiStatus">—</span></span>
+  <span style="margin-left:auto;font-size:11px;color:#8b949e;" id="liveTime">--:--:-- IST</span>
+</div>
+
+<!-- ═══════════════════════════════════ RECEIVER ACTION BANNER ═══════════════════════════════════ -->
+<div class="alert-banner hidden" id="receiverBanner">
+  <i class="fa-solid fa-triangle-exclamation" style="font-size:22px;color:#ffd580;flex-shrink:0;"></i>
+  <div style="flex:1;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <span class="alert-badge">HELD FOR REVIEW</span>
+      <span class="alert-order-badge" id="bannerOrderId">—</span>
+      <span class="alert-amount-badge" id="bannerAmount">—</span>
+    </div>
+    <div class="alert-title" id="bannerTitle">Refund held by the risk engine</div>
+    <div class="alert-sub" id="bannerSub">A rule-based risk assessment or an operator placed this refund on hold. A Reviewer or Admin must approve or reject it with a written reason. Approval only triggers a <strong>simulated</strong> release.</div>
+  </div>
+  <div class="alert-actions">
+    <button class="btn-approve" onclick="openBannerReview()"><i class="fa-solid fa-clipboard-check"></i> Open review</button>
+    <button onclick="document.getElementById('receiverBanner').classList.add('hidden')" style="background:transparent;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:4px;"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MAIN ═══════════════════════════════════ -->
+<main id="opsMain">
+
+  <!-- METRIC CARDS -->
+  <div class="metrics-grid" id="metricsGrid">
+    <div class="card metric-card metric-info">
+      <div class="metric-label"><i class="fa-solid fa-arrow-down-to-line" style="margin-right:4px;"></i>Total Inward Refunds</div>
+      <div class="metric-value" id="m-refunds">—</div>
+      <div class="metric-sub text-muted">Audit ledger entries</div>
+    </div>
+    <div class="card metric-card" style="border-top:2px solid var(--accent-green)">
+      <div class="metric-label"><i class="fa-solid fa-circle-check" style="margin-right:4px;color:var(--accent-green);"></i>Settlement Matched</div>
+      <div class="metric-value" id="m-matched" style="color:var(--accent-green)">—</div>
+      <div class="metric-sub text-muted">UTR Linked &amp; Verified</div>
+    </div>
+    <div class="card metric-card metric-warn">
+      <div class="metric-label"><i class="fa-solid fa-hourglass-half" style="margin-right:4px;color:var(--accent-orange);"></i>Due Within a Day</div>
+      <div class="metric-value" id="m-delays" style="color:var(--accent-orange)">—</div>
+      <div class="metric-sub" style="color:var(--accent-orange);font-size:10px;">RBI TAT deadline close</div>
+    </div>
+    <div class="card metric-card metric-danger">
+      <div class="metric-label"><i class="fa-solid fa-stopwatch" style="margin-right:4px;color:var(--accent-red);"></i>SLA Breached</div>
+      <div class="metric-value" id="m-breached" style="color:var(--accent-red)">—</div>
+      <div class="metric-sub" style="color:var(--accent-red);font-size:10px;" id="m-compliance">Past RBI TAT deadline</div>
+    </div>
+    <div class="card metric-card metric-danger">
+      <div class="metric-label"><i class="fa-solid fa-indian-rupee-sign" style="margin-right:4px;color:var(--accent-red);"></i>Compensation Exposure</div>
+      <div class="metric-value" id="m-exposure" style="color:var(--accent-red)">—</div>
+      <div class="metric-sub" style="color:var(--accent-red);font-size:10px;">Est. ₹/day of delay</div>
+    </div>
+    <div class="card metric-card metric-danger">
+      <div class="metric-label"><i class="fa-solid fa-not-equal" style="margin-right:4px;color:var(--accent-red);"></i>Amount Mismatch</div>
+      <div class="metric-value" id="m-mismatch" style="color:var(--accent-red)">—</div>
+      <div class="metric-sub" style="color:var(--accent-red);font-size:10px;">Variance Detected</div>
+    </div>
+    <div class="card metric-card" style="border-top:2px solid #8957e5;">
+      <div class="metric-label"><i class="fa-solid fa-magnifying-glass-chart" style="margin-right:4px;color:#8957e5;"></i>Discrepancy Cases</div>
+      <div class="metric-value" id="m-cases" style="color:#8957e5">—</div>
+      <div class="metric-sub text-muted">Awaiting Investigation</div>
+    </div>
+  </div>
+
+  <!-- INDIA PAYMENTS OBSERVABILITY ENGINE -->
+  <div class="obs-panel" id="obsPanel">
+    <div class="obs-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="obs-title"><i class="fa-solid fa-satellite-dish" style="color:var(--accent-blue);margin-right:6px;"></i>India Digital Payments Observability Engine</span>
+          <span class="realtime-badge"><span class="pulse-dot"></span>REALTIME FEED</span>
+        </div>
+        <div class="obs-sub">High-frequency side-by-side telemetry: National Success Velocity vs. Interbank Dropoffs &amp; Technical Failures</div>
+      </div>
+      <div style="display:flex;gap:24px;text-align:right;">
+        <div class="obs-stat">
+          <div class="obs-stat-label">24H India Volume</div>
+          <div class="obs-stat-val">₹68,492 Cr</div>
+        </div>
+        <div class="obs-stat">
+          <div class="obs-stat-label">Total Cleared Today</div>
+          <div class="obs-stat-val">41.8 Cr Txns</div>
+        </div>
+        <div class="obs-stat">
+          <div class="obs-stat-label">TAT Health Index</div>
+          <div class="obs-stat-val green">99.84%</div>
+        </div>
+      </div>
+    </div>
+    <div class="obs-charts">
+      <div class="chart-card">
+        <div class="chart-title"><span class="status-dot dot-green"></span>Live Payments Velocity (TPS)</div>
+        <div class="chart-desc">Successful settlements across UPI, RuPay, IMPS &amp; NetBanking</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px;">
+          <span class="chart-main-val green" id="tpsValue">5,369</span>
+          <span class="chart-delta" id="tpsDelta">▲ +0.1%</span>
+          <span class="chart-bench" style="margin-left:auto;">Peak: 6,490 TPS</span>
+        </div>
+        <canvas id="tpsChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="status-dot dot-orange"></span>Transaction Failure Rate (Drops/Sec)</div>
+        <div class="chart-desc">Bank CBS timeouts, gateway server errors &amp; debit-without-credit</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px;">
+          <span class="chart-main-val red" id="fpsValue">19.1</span>
+          <span class="chart-delta neg" id="fpsDelta">▼ -0.36%</span>
+          <span class="chart-bench" style="margin-left:auto;">Benchmark: &lt; 0.35%</span>
+        </div>
+        <canvas id="fpsChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PLACE ORDER & ORDERS TABLE ─── -->
+  <div class="two-col">
+    <div class="card" style="padding:16px;">
+      <div class="section-title"><i class="fa-solid fa-cart-plus" style="margin-right:6px;color:var(--accent-blue);"></i>New Order Checkout</div>
+      <div style="display:grid;gap:10px;">
+        <div>
+          <div class="form-label">Customer Name</div>
+          <input type="text" class="form-input" id="newCustomer" placeholder="e.g. Rajesh Kumar" />
+        </div>
+        <div class="checkout-grid">
+          <div>
+            <div class="form-label">Amount (₹)</div>
+            <input type="number" class="form-input" id="newAmount" placeholder="e.g. 2500" />
+          </div>
+          <div>
+            <div class="form-label">Payment Method</div>
+            <select class="form-input" id="newMethod">
+              <option value="UPI">UPI</option>
+              <option value="NETBANKING">NetBanking</option>
+              <option value="CARD">Card</option>
+              <option value="IMPS">IMPS</option>
+              <option value="NEFT">NEFT</option>
+              <option value="RTGS">RTGS</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="placeOrder()" style="background:linear-gradient(135deg,#1a7f37,#2ea043);border:none;color:white;font-weight:600;padding:10px;border-radius:6px;cursor:pointer;font-size:13px;">
+          <i class="fa-solid fa-lock"></i> Pay &amp; Place Order
+        </button>
+      </div>
+    </div>
+    <div class="card" style="padding:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="section-title" style="margin:0;border:none;padding:0;"><i class="fa-solid fa-receipt" style="margin-right:6px;color:var(--accent-green);"></i>Orders Ledger</div>
+        <button onclick="loadOrders()" class="nav-btn" style="padding:4px 10px;font-size:11px;"><i class="fa-solid fa-refresh"></i> Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Order ID</th><th>Customer</th><th>Amount</th><th>Method</th><th>Status</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="ordersBody"><tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── REFUNDS & TIMELINE ─── -->
+  <div class="two-col">
+    <div class="card" style="padding:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="section-title" style="margin:0;border:none;padding:0;"><i class="fa-solid fa-rotate-left" style="margin-right:6px;color:var(--accent-orange);"></i>Refunds Ledger</div>
+        <button onclick="loadRefunds()" class="nav-btn" style="padding:4px 10px;font-size:11px;"><i class="fa-solid fa-refresh"></i> Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Refund ID</th><th>Order</th><th>Amount</th><th>Status</th><th>Risk (rule-based)</th><th>RBI TAT SLA</th><th>Gateway Ref</th><th>Details</th>
+          </tr></thead>
+          <tbody id="refundsBody"><tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">Sign in to load refunds.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" data-perm="SETTLEMENT_UPLOAD" style="padding:16px;">
+      <div class="section-title"><i class="fa-solid fa-cloud-upload-alt" style="margin-right:6px;color:var(--accent-blue);"></i>Settlement CSV Upload</div>
+      <div class="csv-zone" onclick="document.getElementById('csvInput').click()">
+        <i class="fa-solid fa-file-csv" style="font-size:32px;color:var(--text-dim);margin-bottom:8px;display:block;"></i>
+        <div style="font-size:13px;color:var(--text-muted);">Click to upload Bank Settlement CSV</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Format: refund_reference, utr_number, amount, settlement_date</div>
+        <input type="file" id="csvInput" accept=".csv" style="display:none;" onchange="uploadCSV()" />
+      </div>
+      <div id="csvResult" style="margin-top:10px;font-size:12px;"></div>
+    </div>
+  </div>
+
+  <!-- ─── REVIEW QUEUE (hold-and-release) ─── -->
+  <div class="card" data-perm="REVIEW_VIEW" style="padding:16px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="section-title" style="margin:0;border:none;padding:0;"><i class="fa-solid fa-user-shield" style="margin-right:6px;color:#d29922;"></i>High-Risk Review Queue <span style="font-size:10px;color:var(--text-muted);font-weight:400;">(rule-based risk &middot; held refunds awaiting a decision)</span></div>
+      <button onclick="loadReviews()" class="nav-btn" style="padding:4px 10px;font-size:11px;"><i class="fa-solid fa-refresh"></i> Refresh</button>
+    </div>
+    <div id="riskDist" style="font-size:11px;color:var(--text-muted);margin-bottom:8px;"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Refund</th><th>Order</th><th>Amount</th><th>Risk</th><th>Status</th><th>Held at</th><th>Why it was held</th><th>Action</th></tr></thead>
+      <tbody id="reviewBody"><tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <!-- ─── CASES ─── -->
+  <div class="card" style="padding:16px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="section-title" style="margin:0;border:none;padding:0;"><i class="fa-solid fa-flag" style="margin-right:6px;color:#f85149;"></i>Discrepancy Cases Queue</div>
+      <button onclick="loadCases()" class="nav-btn" style="padding:4px 10px;font-size:11px;"><i class="fa-solid fa-refresh"></i> Refresh</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Case ID</th><th>Refund / Order</th><th>Issue Type</th><th>Severity</th><th>Status</th><th>AI Root Cause Hypothesis</th><th>Detected Date</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="casesBody"><tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── SIMULATOR TOOLS ─── -->
+  <div class="card" data-perm="SIMULATOR_USE" style="padding:16px;margin-bottom:16px;">
+    <div class="section-title"><i class="fa-solid fa-flask" style="margin-right:6px;color:#8957e5;"></i>Simulator &amp; Test Tools</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      <button class="tbl-btn tbl-btn-blue" onclick="cancelOrder()" style="font-size:12px;padding:7px 14px;">
+        <i class="fa-solid fa-ban"></i> Simulate Order Cancel (ORD-9001)
+      </button>
+      <button class="tbl-btn tbl-btn-red" onclick="dupTest()" style="font-size:12px;padding:7px 14px;">
+        <i class="fa-solid fa-copy"></i> Test Duplicate Webhook (Idempotency)
+      </button>
+      <button class="tbl-btn" style="font-size:12px;padding:7px 14px;border-color:#8957e5;color:#8957e5;background:rgba(137,87,229,0.1);" onclick="checkOverdue()">
+        <i class="fa-solid fa-clock"></i> Run RBI TAT SLA Check
+      </button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+      <div style="min-width:140px;">
+        <div class="form-label">Order ID</div>
+        <input type="text" class="form-input" id="simOrderId" value="ORD-9002" style="padding:6px 10px;font-size:12px;" />
+      </div>
+      <div style="width:90px;">
+        <div class="form-label">Days</div>
+        <input type="number" class="form-input" id="simDays" value="3" min="1" max="60" style="padding:6px 10px;font-size:12px;" />
+      </div>
+      <button class="tbl-btn" style="font-size:12px;padding:7px 14px;border-color:#d29922;color:#d29922;background:rgba(210,153,34,0.1);" onclick="ageRefundSim()" title="Moves the refund's start date back so you can see an SLA breach without waiting">
+        <i class="fa-solid fa-forward-fast"></i> Time-travel refund (+days)
+      </button>
+      <button class="tbl-btn tbl-btn-red" style="font-size:12px;padding:7px 14px;" onclick="failRefundSim()">
+        <i class="fa-solid fa-circle-xmark"></i> Simulate Refund FAILED
+      </button>
+      <button class="tbl-btn tbl-btn-green" style="font-size:12px;padding:7px 14px;" onclick="signedWebhookSim()">
+        <i class="fa-solid fa-signature"></i> Test Signed Webhook (genuine vs tampered)
+      </button>
+    </div>
+    <div id="simResult" style="margin-top:10px;font-size:12px;"></div>
+  </div>
+
+  <!-- ─── RBI TAT POLICY ─── -->
+  <div class="card" style="padding:16px;margin-bottom:16px;">
+    <div class="section-title"><i class="fa-solid fa-scale-balanced" style="margin-right:6px;color:var(--accent-blue);"></i>RBI TAT SLA Policy (per payment method)</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">
+      Deadline = end of calendar day T+N, where T is the day the refund was initiated. Defaults follow the RBI TAT circular for failed transactions
+      and can be changed in <code>application.properties</code>. Compensation is an estimate of exposure per day of delay.
+    </div>
+    <div class="table-wrap">
+      <table class="policy-table">
+        <thead><tr><th>Payment Method</th><th>Deadline</th><th>Compensation / day</th></tr></thead>
+        <tbody id="policyBody"><tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════ REVIEWER DASHBOARD ═══════════════════════════════════ -->
+<main id="reviewerMain" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <div>
+      <div style="font-size:18px;font-weight:700;"><i class="fa-solid fa-user-shield" style="color:#d29922;margin-right:8px;"></i>Reviewer Dashboard</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Refunds held by the rule-based risk engine or flagged by operations. Approval only triggers a <strong>simulated</strong> release &mdash; RefundGuard never moves money.</div>
+    </div>
+    <button class="nav-btn" onclick="loadReviewerDashboard()"><i class="fa-solid fa-refresh"></i> Refresh</button>
+  </div>
+
+  <div class="metrics-grid rv-metrics">
+    <div class="card metric-card" style="border-top:2px solid #d29922;">
+      <div class="metric-label"><i class="fa-solid fa-hourglass-half" style="margin-right:4px;color:#d29922;"></i>Pending Reviews</div>
+      <div class="metric-value" id="rv-pending" style="color:#d29922">—</div>
+      <div class="metric-sub text-muted" id="rv-pending-sub">Waiting to be picked up</div>
+    </div>
+    <div class="card metric-card metric-danger">
+      <div class="metric-label"><i class="fa-solid fa-skull-crossbones" style="margin-right:4px;color:var(--accent-red);"></i>High-Risk Cases</div>
+      <div class="metric-value" id="rv-high" style="color:var(--accent-red)">—</div>
+      <div class="metric-sub" style="color:var(--accent-red);font-size:10px;">Open, latest risk HIGH / CRITICAL</div>
+    </div>
+    <div class="card metric-card metric-danger">
+      <div class="metric-label"><i class="fa-solid fa-stopwatch" style="margin-right:4px;color:var(--accent-red);"></i>SLA Breached</div>
+      <div class="metric-value" id="rv-sla" style="color:var(--accent-red)">—</div>
+      <div class="metric-sub" style="color:var(--accent-red);font-size:10px;">Open, past RBI TAT deadline</div>
+    </div>
+    <div class="card metric-card" style="border-top:2px solid #8957e5;">
+      <div class="metric-label"><i class="fa-solid fa-arrow-up" style="margin-right:4px;color:#8957e5;"></i>Escalated</div>
+      <div class="metric-value" id="rv-esc" style="color:#8957e5">—</div>
+      <div class="metric-sub text-muted">Admin decision required</div>
+    </div>
+    <div class="card metric-card metric-info">
+      <div class="metric-label"><i class="fa-solid fa-circle-question" style="margin-right:4px;color:var(--accent-blue);"></i>Awaiting Info</div>
+      <div class="metric-value" id="rv-info" style="color:var(--accent-blue)">—</div>
+      <div class="metric-sub text-muted">Returned to operations</div>
+    </div>
+    <div class="card metric-card" style="border-top:2px solid var(--accent-green)">
+      <div class="metric-label"><i class="fa-solid fa-circle-check" style="margin-right:4px;color:var(--accent-green);"></i>Completed Reviews</div>
+      <div class="metric-value" id="rv-done" style="color:var(--accent-green)">—</div>
+      <div class="metric-sub text-muted" id="rv-done-sub">Approved / rejected</div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:16px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="section-title" style="margin:0;border:none;padding:0;"><i class="fa-solid fa-list-check" style="margin-right:6px;color:#d29922;"></i>Review Queue <span id="rvCount" style="font-size:10px;color:var(--text-muted);font-weight:400;"></span></div>
+    </div>
+    <div class="rv-filters">
+      <div style="flex:1;min-width:200px;">
+        <div class="form-label">Search</div>
+        <input type="text" class="form-input" id="rvSearch" placeholder="Case, refund, order, submitter or reason" oninput="renderReviewerQueue()" />
+      </div>
+      <div>
+        <div class="form-label">Status</div>
+        <select class="form-input" id="rvStatus" onchange="loadReviewerQueue()">
+          <option value="OPEN">All open cases</option>
+          <option value="PENDING">Pending review</option>
+          <option value="UNDER_REVIEW">Under review</option>
+          <option value="MORE_INFO_REQUIRED">More info required</option>
+          <option value="ESCALATED">Escalated</option>
+          <option value="APPROVED">Approved for release</option>
+          <option value="REJECTED">Rejected</option>
+          <option value="SUPERSEDED">Superseded</option>
+          <option value="ALL">All (latest 100)</option>
+        </select>
+      </div>
+      <div>
+        <div class="form-label">Risk</div>
+        <select class="form-input" id="rvRisk" onchange="renderReviewerQueue()">
+          <option value="">Any</option>
+          <option value="HIGHPLUS">High or critical</option>
+          <option value="CRITICAL">Critical</option>
+          <option value="HIGH">High</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="LOW">Low</option>
+        </select>
+      </div>
+      <div>
+        <div class="form-label">Origin</div>
+        <select class="form-input" id="rvOrigin" onchange="renderReviewerQueue()">
+          <option value="">Any</option>
+          <option value="AUTO_RISK">Risk engine</option>
+          <option value="MANUAL">Flagged by user</option>
+        </select>
+      </div>
+      <label style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;padding-bottom:6px;">
+        <input type="checkbox" id="rvSlaOnly" onchange="renderReviewerQueue()" /> SLA breached only
+      </label>
+      <label style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;padding-bottom:6px;">
+        <input type="checkbox" id="rvMine" onchange="renderReviewerQueue()" /> Assigned to me
+      </label>
+    </div>
+    <div class="table-wrap rv-queue-wrap"><table>
+      <thead><tr><th>Case</th><th>Refund / Order</th><th>Amount</th><th>Risk</th><th>Status</th><th>Submitted</th><th>Origin / By</th><th>RBI TAT SLA</th><th>Action</th></tr></thead>
+      <tbody id="rvBody"><tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</td></tr></tbody>
+    </table></div>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════ ADMIN: RISK ANALYTICS ═══════════════════════════════════ -->
+<main id="riskMain" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <div>
+      <div style="font-size:18px;font-weight:700;"><i class="fa-solid fa-chart-column" style="color:#8957e5;margin-right:8px;"></i>Risk Analytics <span style="font-size:11px;font-weight:600;color:var(--text-muted);">ADMIN PORTAL</span></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;" id="rkDisclaimer">Rule-based risk indicator &mdash; not a machine-learning model, not a fraud probability and not proof of fraud.</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="nav-btn" data-perm="RISK_ASSESS" id="rkBackfillBtn" onclick="assessUnassessed()"><i class="fa-solid fa-calculator"></i> Assess unassessed refunds</button>
+      <button class="nav-btn" onclick="loadRiskAnalytics()"><i class="fa-solid fa-refresh"></i> Refresh</button>
+    </div>
+  </div>
+
+  <div class="metrics-grid rv-metrics">
+    <div class="card metric-card metric-info">
+      <div class="metric-label"><i class="fa-solid fa-list-check" style="margin-right:4px;color:var(--accent-blue);"></i>Refunds Assessed</div>
+      <div class="metric-value" id="rk-assessed" style="color:var(--accent-blue)">—</div>
+      <div class="metric-sub text-muted" id="rk-assessed-sub">of — refunds</div>
+    </div>
+    <div class="card metric-card metric-danger">
+      <div class="metric-label"><i class="fa-solid fa-skull-crossbones" style="margin-right:4px;color:var(--accent-red);"></i>High / Critical</div>
+      <div class="metric-value" id="rk-high" style="color:var(--accent-red)">—</div>
+      <div class="metric-sub" style="color:var(--accent-red);font-size:10px;" id="rk-high-sub">Latest assessment</div>
+    </div>
+    <div class="card metric-card metric-danger">
+      <div class="metric-label"><i class="fa-solid fa-not-equal" style="margin-right:4px;color:var(--accent-red);"></i>Amount Mismatches</div>
+      <div class="metric-value" id="rk-mismatch" style="color:var(--accent-red)">—</div>
+      <div class="metric-sub" style="color:var(--accent-red);font-size:10px;">Settled amount &ne; refund amount</div>
+    </div>
+    <div class="card metric-card" style="border-top:2px solid #d29922;">
+      <div class="metric-label"><i class="fa-solid fa-hourglass-half" style="margin-right:4px;color:#d29922;"></i>Pending Reviews</div>
+      <div class="metric-value" id="rk-pending" style="color:#d29922">—</div>
+      <div class="metric-sub text-muted">Waiting for a Reviewer</div>
+    </div>
+    <div class="card metric-card" style="border-top:2px solid #8957e5;">
+      <div class="metric-label"><i class="fa-solid fa-gavel" style="margin-right:4px;color:#8957e5;"></i>Policy Violations</div>
+      <div class="metric-value" id="rk-policy" style="color:#8957e5">—</div>
+      <div class="metric-sub text-muted">Held for reviewer approval</div>
+    </div>
+    <div class="card metric-card metric-warn">
+      <div class="metric-label"><i class="fa-solid fa-clock-rotate-left" style="margin-right:4px;color:var(--accent-orange);"></i>Outdated Scores</div>
+      <div class="metric-value" id="rk-outdated" style="color:var(--accent-orange)">—</div>
+      <div class="metric-sub text-muted" id="rk-version">Older rule version / config</div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:16px;margin-bottom:16px;">
+    <div class="section-title"><i class="fa-solid fa-chart-simple" style="margin-right:6px;color:#8957e5;"></i>Risk distribution <span style="font-size:10px;color:var(--text-muted);font-weight:400;">(latest assessment of each refund)</span></div>
+    <div id="rkDist"><div style="font-size:12px;color:var(--text-muted);">Loading...</div></div>
+  </div>
+
+  <div class="card" style="padding:16px;margin-bottom:16px;">
+    <div class="section-title" style="border:none;margin-bottom:6px;"><i class="fa-solid fa-table-list" style="margin-right:6px;color:var(--accent-blue);"></i>Scored refunds <span id="rkCount" style="font-size:10px;color:var(--text-muted);font-weight:400;"></span></div>
+    <div class="rv-filters">
+      <div style="flex:1;min-width:180px;">
+        <div class="form-label">Search</div>
+        <input type="text" class="form-input" id="rkSearch" placeholder="Refund #, order or gateway id" oninput="riskSearchInput()" />
+      </div>
+      <div>
+        <div class="form-label">Risk level</div>
+        <select class="form-input" id="rkLevel" onchange="riskFilterChanged()">
+          <option value="">Any</option><option value="CRITICAL">Critical</option><option value="HIGH">High</option>
+          <option value="MEDIUM">Medium</option><option value="LOW">Low</option><option value="UNASSESSED">Not assessed</option>
+        </select>
+      </div>
+      <div>
+        <div class="form-label">Refund status</div>
+        <select class="form-input" id="rkStatus" onchange="riskFilterChanged()">
+          <option value="">Any</option><option>REQUESTED</option><option>GATEWAY_PENDING</option><option>GATEWAY_PROCESSED</option>
+          <option>SETTLEMENT_MATCHED</option><option>POTENTIAL_DELAY</option><option>SLA_BREACHED</option><option>AMOUNT_MISMATCH</option>
+          <option>FAILED_REPORTED</option><option>RESOLVED</option><option>ON_HOLD</option><option>REJECTED</option>
+        </select>
+      </div>
+      <div>
+        <div class="form-label">Requested from</div>
+        <input type="date" class="form-input" id="rkFrom" onchange="riskFilterChanged()" />
+      </div>
+      <div>
+        <div class="form-label">to</div>
+        <input type="date" class="form-input" id="rkTo" onchange="riskFilterChanged()" />
+      </div>
+      <div>
+        <div class="form-label">Sort</div>
+        <select class="form-input" id="rkSort" onchange="riskFilterChanged()">
+          <option value="score">Highest score</option><option value="requestedAt">Newest</option><option value="amount">Largest amount</option>
+        </select>
+      </div>
+      <label style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;padding-bottom:6px;">
+        <input type="checkbox" id="rkMismatch" onchange="riskFilterChanged()" /> Amount mismatch
+      </label>
+      <label style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;padding-bottom:6px;">
+        <input type="checkbox" id="rkPolicy" onchange="riskFilterChanged()" /> Policy violation
+      </label>
+    </div>
+    <div class="table-wrap rv-queue-wrap"><table>
+      <thead><tr><th>Refund</th><th>Order</th><th>Amount</th><th>Status</th><th>Score</th><th>Level</th><th>Assessed</th><th>Why (rule-based)</th><th>Details</th></tr></thead>
+      <tbody id="rkBody"><tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</td></tr></tbody>
+    </table></div>
+    <div class="rk-pager">
+      <span id="rkPageInfo"></span>
+      <button class="tbl-btn tbl-btn-blue" id="rkPrev" onclick="riskPageMove(-1)"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+      <button class="tbl-btn tbl-btn-blue" id="rkNext" onclick="riskPageMove(1)">Next <i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════ MODALS ═══════════════════════════════════ -->
+
+<!-- Risk Detail Modal (admin risk analytics) -->
+<div class="modal-overlay hidden" id="riskDetailModal">
+  <div class="modal-box modal-wide">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span class="modal-title" style="margin:0;"><i class="fa-solid fa-magnifying-glass-chart" style="color:#8957e5;margin-right:8px;"></i><span id="riskDetailTitle">Refund risk</span></span>
+      <button onclick="closeModal('riskDetailModal')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="riskDetailBody"></div>
+  </div>
+</div>
+
+<!-- Review Case Modal (reviewer dashboard case details) -->
+<div class="modal-overlay hidden" id="reviewCaseModal">
+  <div class="modal-box modal-wide">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span class="modal-title" style="margin:0;"><i class="fa-solid fa-folder-open" style="color:#d29922;margin-right:8px;"></i><span id="reviewCaseTitle">Review case</span></span>
+      <button onclick="closeModal('reviewCaseModal')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="reviewCaseBody"></div>
+  </div>
+</div>
+
+<!-- Flag / Submit-for-review Modal -->
+<div class="modal-overlay hidden" id="flagModal" style="z-index:1100;">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span class="modal-title" style="margin:0;"><i class="fa-solid fa-flag" style="color:#f85149;margin-right:8px;"></i>Flag refund for review</span>
+      <button onclick="closeModal('flagModal')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="flagInfo" style="font-size:12px;color:var(--text-muted);margin-bottom:10px;"></div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">The refund is placed <strong>ON HOLD</strong> and sent to the Reviewer queue. It cannot be released until a Reviewer or Admin approves it.</div>
+    <div class="form-label">Reason for flagging (required, 5-500 characters)</div>
+    <textarea id="flagReason" rows="4" maxlength="500" class="form-input" style="margin:4px 0 8px;"></textarea>
+    <div id="flagMsg" style="font-size:12px;min-height:16px;margin-bottom:8px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="tbl-btn tbl-btn-blue rv-action-btn" onclick="closeModal('flagModal')">Cancel</button>
+      <button class="tbl-btn tbl-btn-red rv-action-btn" id="flagBtn" onclick="submitFlag()"><i class="fa-solid fa-flag"></i> Submit for review</button>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal-overlay hidden" id="loginModal" style="z-index:9999;">
+  <div class="modal-box" style="max-width:380px;">
+    <div style="font-size:18px;font-weight:700;margin-bottom:4px;"><i class="fa-solid fa-lock" style="color:var(--accent-blue);margin-right:8px;"></i>Sign in to RefundGuard.AI</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;">Access is role-based (Operator, Reviewer, Admin) and enforced by the server.</div>
+    <label style="font-size:11px;color:var(--text-muted);">Username</label>
+    <input id="loginUser" autocomplete="username" style="width:100%;margin:4px 0 10px;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card2);color:var(--text-primary);" />
+    <label style="font-size:11px;color:var(--text-muted);">Password</label>
+    <input id="loginPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;margin:4px 0 10px;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card2);color:var(--text-primary);" />
+    <div id="loginErr" style="font-size:12px;color:#f85149;min-height:16px;margin-bottom:8px;"></div>
+    <button id="loginBtn" onclick="doLogin()" style="width:100%;padding:9px;border:none;border-radius:6px;background:var(--accent-blue);color:white;font-weight:600;cursor:pointer;">Sign in</button>
+  </div>
+</div>
+
+<!-- Timeline Modal -->
+<div class="modal-overlay hidden" id="timelineModal">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <span class="modal-title"><i class="fa-solid fa-timeline" style="color:var(--accent-blue);margin-right:8px;"></i>Refund Details, Risk &amp; Timeline</span>
+      <button onclick="closeModal('timelineModal')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="timelineBody"></div>
+  </div>
+</div>
+
+<!-- Receiver Action Modal -->
+<div class="modal-overlay hidden" id="receiverModal">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <span class="modal-title"><i class="fa-solid fa-bell" style="color:var(--accent-orange);margin-right:8px;"></i>Receiver Action</span>
+      <button onclick="closeModal('receiverModal')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="receiverModalBody"></div>
+  </div>
+</div>
+
+<!-- Support Modal -->
+<div class="modal-overlay hidden" id="supportModal">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <span class="modal-title"><i class="fa-solid fa-headset" style="color:var(--accent-green);margin-right:8px;"></i>Support Center</span>
+      <button onclick="closeModal('supportModal')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div style="font-size:13px;color:var(--text-muted);line-height:1.8;">
+      <p><i class="fa-solid fa-envelope" style="color:var(--accent-blue);margin-right:8px;"></i><strong>Email:</strong> support@refundguard.ai</p>
+      <p><i class="fa-solid fa-phone" style="color:var(--accent-green);margin-right:8px;"></i><strong>Helpline:</strong> 1800-RBI-GUARD (24x7)</p>
+      <p><i class="fa-brands fa-slack" style="color:#8957e5;margin-right:8px;"></i><strong>Slack:</strong> #refundguard-ops</p>
+      <p style="margin-top:16px;padding:12px;background:var(--bg-card2);border-radius:6px;border-left:3px solid var(--accent-orange);">
+        <i class="fa-solid fa-info-circle" style="color:var(--accent-orange);margin-right:6px;"></i>
+        For RBI escalations, please quote your Case ID. Response SLA: &lt; 2 hours during banking hours.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <i class="fa-solid fa-circle-check" id="toastIcon"></i>
+  <span id="toastMsg">Done</span>
+</div>
+
+<!-- ═══════════════════════════════════ JAVASCRIPT ═══════════════════════════════════ -->
+<script>
+const API = '';
+// ── Authentication / RBAC (the SERVER enforces everything; this only shapes the UI) ──
+let AUTH = null;      // Authorization header, kept in memory only (cleared on reload / sign-out)
+let ME = null;        // {username, role, permissions[]}
+let appStarted = false;
+const _origFetch = window.fetch.bind(window);
+window.fetch = async function(url, opts) {
+  opts = Object.assign({}, opts || {});
+  opts.headers = Object.assign({}, opts.headers || {});
+  const isApi = String(url).startsWith(API + '/api');
+  if (AUTH && isApi) opts.headers['Authorization'] = AUTH;
+  const r = await _origFetch(url, opts);
+  if (isApi && r.status === 401 && AUTH) { signOut('Session expired - please sign in again.'); }
+  if (isApi && r.status === 403) { try { showToast((await r.clone().json()).message || 'Not permitted', 'error'); } catch (e) { showToast('Not permitted', 'error'); } }
+  return r;
+};
+function can(perm) { return !!(ME && ME.permissions && ME.permissions.includes(perm)); }
+function applyRole() {
+  document.querySelectorAll('[data-perm]').forEach(el => { el.style.display = can(el.getAttribute('data-perm')) ? '' : 'none'; });
+  const who = document.getElementById('whoami'), btn = document.getElementById('authBtn');
+  if (ME) {
+    who.style.display = ''; who.innerHTML = '<i class="fa-solid fa-id-badge"></i> ' + esc(ME.username) + ' &middot; <strong>' + esc(ME.role) + '</strong>';
+    btn.innerHTML = '<i class="fa-solid fa-right-from-bracket"></i> Sign Out';
+  } else {
+    who.style.display = 'none'; btn.innerHTML = '<i class="fa-solid fa-user"></i> Sign In';
+  }
+}
+function authButton() { if (ME) signOut(); else showLogin(); }
+function showLogin(msg) {
+  document.getElementById('loginErr').textContent = msg || '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('loginUser').focus(), 50);
+}
+function signOut(msg) {
+  AUTH = null; ME = null; applyRole();
+  ['refundsBody','casesBody','ordersBody','reviewBody','rvBody','rkBody'].forEach(id => { const e = document.getElementById(id); if (e) e.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;">Signed out.</td></tr>'; });
+  ['reviewCaseModal','flagModal','timelineModal','receiverModal','riskDetailModal'].forEach(id => closeModal(id));
+  showView('ops');
+  document.getElementById('receiverBanner').classList.add('hidden');
+  document.getElementById('alertCount').textContent = '0';
+  showLogin(typeof msg === 'string' ? msg : '');
+}
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim(), p = document.getElementById('loginPass').value;
+  const btn = document.getElementById('loginBtn');
+  if (!u || !p) { document.getElementById('loginErr').textContent = 'Enter username and password.'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const header = 'Basic ' + btoa(unescape(encodeURIComponent(u + ':' + p)));
+    const r = await _origFetch(API + '/api/auth/me', { headers: { 'Authorization': header } });
+    if (!r.ok) { document.getElementById('loginErr').textContent = r.status === 401 ? 'Invalid username or password.' : 'Sign-in failed (' + r.status + ').'; return; }
+    ME = await r.json(); AUTH = header;
+    document.getElementById('loginModal').classList.add('hidden');
+    applyRole();
+    showView(ME.role === 'REVIEWER' ? 'reviewer' : 'ops');   // reviewers land on their dashboard
+    startApp();
+    showToast('Signed in as ' + ME.username + ' (' + ME.role + ')', 'success');
+  } catch (e) {
+    document.getElementById('loginErr').textContent = 'Cannot reach the server.';
+  } finally { btn.disabled = false; btn.textContent = 'Sign in'; document.getElementById('loginPass').value = ''; }
+}
+function startApp() {
+  loadSummary(); loadRefunds(); loadReviews();
+  if (can('ORDER_VIEW')) loadOrders();
+  if (can('CASE_VIEW')) loadCases();
+  if (can('REFUND_VIEW')) loadSlaPolicy();
+  if (can('REVIEW_DECIDE')) loadReviewerDashboard();
+  if (!appStarted) { appStarted = true; setInterval(() => { if (AUTH) { loadSummary(); loadRefunds(); loadReviews(); if (can('REVIEW_DECIDE')) loadReviewerDashboard(); if (currentView === 'risk') loadRiskAnalytics(); } }, 30000); }
+}
+// ── Operations view vs. Reviewer dashboard ──
+let currentView = 'ops';
+function showView(view) {
+  currentView = 'ops';
+  if (view === 'reviewer' && can('REVIEW_DECIDE')) currentView = 'reviewer';
+  if (view === 'risk' && can('RISK_ANALYTICS_VIEW')) currentView = 'risk';
+  document.getElementById('opsMain').style.display = currentView === 'ops' ? '' : 'none';
+  document.getElementById('reviewerMain').style.display = currentView === 'reviewer' ? '' : 'none';
+  document.getElementById('riskMain').style.display = currentView === 'risk' ? '' : 'none';
+  const opsLabel = '<i class="fa-solid fa-gauge" style="color:#388bfd;"></i> Operations View';
+  const t = document.getElementById('viewToggle');
+  if (t) t.innerHTML = currentView === 'reviewer' ? opsLabel : '<i class="fa-solid fa-user-shield" style="color:#d29922;"></i> Reviewer Dashboard';
+  const rb = document.getElementById('riskViewBtn');
+  if (rb) rb.innerHTML = currentView === 'risk' ? opsLabel : '<i class="fa-solid fa-chart-column" style="color:#8957e5;"></i> Risk Analytics';
+  if (currentView === 'reviewer' && AUTH) loadReviewerDashboard();
+  if (currentView === 'risk' && AUTH) loadRiskAnalytics();
+}
+function toggleView() { showView(currentView === 'reviewer' ? 'ops' : 'reviewer'); }
+function toggleRiskView() { showView(currentView === 'risk' ? 'ops' : 'risk'); }
+let riskByRefund = {};
+function riskChip(id) {
+  const r = riskByRefund[id];
+  if (!r) return '<span style="font-size:10px;color:var(--text-dim);">not assessed</span>';
+  const cls = { LOW: 'pill-blue', MEDIUM: 'pill-orange', HIGH: 'pill-red', CRITICAL: 'pill-red' }[r.level] || 'pill-gray';
+  return '<span class="status-pill ' + cls + '" title="' + esc(r.reasons || 'No rule triggered') + '">' + r.score + ' &middot; ' + esc(r.level) + '</span>' +
+    (r.stale ? '<div style="font-size:10px;color:#d29922;" title="' + esc(r.staleReason || '') + '">&#9888; outdated</div>' : '');
+}
+let isDark = true;
+let tpsData = [], fpsData = [];
+let tpsChart, fpsChart;
+let currentRefundIdForTimeline = null;
+let casesById = {};
+
+// ── Theme ──
+function toggleTheme() {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? '' : 'light');
+  const btn = document.getElementById('themeBtn');
+  btn.innerHTML = isDark ? '<i class="fa-solid fa-moon"></i> Night Theme' : '<i class="fa-solid fa-sun"></i> Day Theme';
+  if (tpsChart) { tpsChart.update(); fpsChart.update(); }
+}
+
+// ── Live Clock ──
+function updateClock() {
+  const now = new Date();
+  const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  const hh = String(ist.getHours()).padStart(2,'0');
+  const mm = String(ist.getMinutes()).padStart(2,'0');
+  const ss = String(ist.getSeconds()).padStart(2,'0');
+  document.getElementById('liveTime').textContent = hh + ':' + mm + ':' + ss + ' IST';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Toast ──
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  const icon = document.getElementById('toastIcon');
+  document.getElementById('toastMsg').textContent = msg;
+  if (type === 'error') {
+    t.style.borderColor = '#f85149';
+    icon.className = 'fa-solid fa-circle-xmark';
+    icon.style.color = '#f85149';
+  } else if (type === 'warn') {
+    t.style.borderColor = '#d29922';
+    icon.className = 'fa-solid fa-triangle-exclamation';
+    icon.style.color = '#d29922';
+  } else {
+    t.style.borderColor = '#3fb950';
+    icon.className = 'fa-solid fa-circle-check';
+    icon.style.color = '#3fb950';
+  }
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── Modal ──
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+// ── Status Pill ──
+function pillHtml(status) {
+  const map = {
+    'REQUESTED': ['pill-blue','clock'], 'GATEWAY_PENDING': ['pill-blue','spinner'],
+    'GATEWAY_PROCESSED': ['pill-green','check'], 'SETTLEMENT_MATCHED': ['pill-green','circle-check'],
+    'POTENTIAL_DELAY': ['pill-orange','hourglass-half'], 'AMOUNT_MISMATCH': ['pill-red','not-equal'],
+    'FAILED_REPORTED': ['pill-red','triangle-exclamation'], 'RESOLVED': ['pill-green','check-double'],
+    'PLACED': ['pill-blue','cart-shopping'], 'PAID': ['pill-green','credit-card'],
+    'CANCELLED': ['pill-red','ban'], 'REFUNDED': ['pill-green','rotate-left'],
+    'OPEN': ['pill-orange','folder-open'], 'RESOLVED_CASE': ['pill-green','check'],
+    'ESCALATED': ['pill-red','arrow-up'],
+    'ON_HOLD': ['pill-orange','hand'], 'REJECTED': ['pill-red','ban'], 'HIGH_RISK_REVIEW': ['pill-orange','user-shield'],
+    'SETTLED_WHILE_ON_HOLD': ['pill-red','triangle-exclamation'], 'REJECTED_REFUND_SETTLED': ['pill-red','triangle-exclamation'],
+    'AMOUNT_MISMATCH_CASE': ['pill-red','not-equal'],
+    'MISSING_SETTLEMENT': ['pill-orange','circle-exclamation'],
+    'SLA_BREACHED': ['pill-red','stopwatch'], 'SLA_BREACH': ['pill-red','stopwatch'],
+    'REFUND_FAILED': ['pill-red','circle-xmark'],
+    'UNMATCHED_SETTLEMENT': ['pill-red','circle-question'],
+    'DUPLICATE_SETTLEMENT': ['pill-red','clone'],
+    'CRITICAL': ['pill-red','skull-crossbones'], 'HIGH': ['pill-red','arrow-up'],
+    'MEDIUM': ['pill-orange','minus'], 'LOW': ['pill-blue','arrow-down'],
+    'PENDING': ['pill-orange','hourglass-half'], 'UNDER_REVIEW': ['pill-blue','magnifying-glass'],
+    'MORE_INFO_REQUIRED': ['pill-orange','circle-question'], 'APPROVED': ['pill-green','check'],
+    'SUPERSEDED': ['pill-gray','forward'],
+  };
+  const [cls, ico] = map[status] || ['pill-gray','circle'];
+  const label = status.replace(/_/g,' ');
+  return '<span class="status-pill ' + cls + '"><i class="fa-solid fa-' + ico + '"></i>' + label + '</span>';
+}
+
+// Escape text that comes from the server / AI before putting it in innerHTML.
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function inr(v) { return '₹' + Number(v || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 }); }
+
+function slaChip(rf) {
+  const state = rf.slaState || 'NOT_TRACKED';
+  const tip = rf.slaDueAt ? ('T+' + rf.slaTatDays + ' · deadline ' + new Date(rf.slaDueAt).toLocaleString('en-IN') +
+    (rf.compensationDue > 0 ? ' · est. compensation ' + inr(rf.compensationDue) : '')) : 'No SLA';
+  return '<span class="sla-chip sla-' + state + '" title="' + esc(tip) + '">' + esc(rf.slaLabel || state) + '</span>' +
+    (rf.compensationDue > 0 ? '<div style="font-size:10px;color:#f85149;margin-top:2px;">' + inr(rf.compensationDue) + ' exposure</div>' : '');
+}
+
+// ── Dashboard Summary ──
+async function loadSummary() {
+  if (!AUTH) return;
+  try {
+    const r = await fetch(API + '/api/dashboard/summary');
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || r.status);
+    document.getElementById('m-refunds').textContent = d.totalRefunds ?? 0;
+    document.getElementById('m-matched').textContent = d.settlementMatched ?? 0;
+    document.getElementById('m-delays').textContent = d.slaDueSoon ?? 0;
+    document.getElementById('m-mismatch').textContent = d.amountMismatch ?? 0;
+    document.getElementById('m-cases').textContent = d.openCases ?? 0;
+    document.getElementById('m-breached').textContent = d.slaBreached ?? 0;
+    document.getElementById('m-exposure').textContent = inr(d.compensationExposure);
+    document.getElementById('m-compliance').textContent = d.tatCompliancePct == null
+      ? 'Past RBI TAT deadline' : ('On-time settlement rate: ' + d.tatCompliancePct + '%');
+    const dist = d.riskDistribution || {};
+    const rd = document.getElementById('riskDist');
+    if (rd) rd.innerHTML = '<strong>Risk of all refunds (latest rule-based assessments):</strong> LOW ' + (dist.LOW || 0) + ' &middot; MEDIUM ' + (dist.MEDIUM || 0) + ' &middot; HIGH ' + (dist.HIGH || 0) + ' &middot; CRITICAL ' + (dist.CRITICAL || 0) + ' &middot; currently on hold: ' + (d.onHold || 0);
+
+    // Header badge + status bar now reflect real SLA data instead of fixed text.
+    const badge = document.getElementById('rbiBadge');
+    const status = document.getElementById('rbiStatus');
+    if ((d.slaBreached ?? 0) > 0) {
+      badge.textContent = 'RBI TAT: ' + d.slaBreached + ' BREACHED';
+      badge.style.background = 'linear-gradient(135deg, #b62324, #f85149)';
+      status.textContent = d.slaBreached + ' BREACH(ES) · ' + inr(d.compensationExposure) + ' exposure';
+      status.style.color = '#f85149';
+    } else if ((d.slaDueSoon ?? 0) > 0) {
+      badge.textContent = 'RBI TAT: ' + d.slaDueSoon + ' DUE SOON';
+      badge.style.background = 'linear-gradient(135deg, #9a6700, #d29922)';
+      status.textContent = d.slaDueSoon + ' due within a day';
+      status.style.color = '#d29922';
+    } else {
+      badge.textContent = 'RBI TAT: ALL ON TRACK';
+      badge.style.background = '';
+      status.textContent = 'ALL REFUNDS WITHIN TAT';
+      status.style.color = '#3fb950';
+    }
+    const ai = document.getElementById('aiStatus');
+    ai.textContent = d.aiMode === 'CLAUDE' ? 'CLAUDE ENABLED' : 'RULES ONLY (no API key)';
+    ai.style.color = d.aiMode === 'CLAUDE' ? '#3fb950' : '#8b949e';
+  } catch(e) {
+    ['m-refunds','m-matched','m-delays','m-mismatch','m-cases','m-breached','m-exposure'].forEach(id => document.getElementById(id).textContent = '—');
+  }
+}
+
+// ── SLA Policy ──
+async function loadSlaPolicy() {
+  try {
+    const r = await fetch(API + '/api/sla/policy');
+    const p = await r.json();
+    document.getElementById('policyBody').innerHTML = Object.entries(p).map(([method, row]) =>
+      '<tr><td style="font-weight:600;">' + esc(method) + '</td><td>' + esc(row.label) + '</td><td>' + inr(row.compensationPerDay) + '</td></tr>'
+    ).join('');
+  } catch(e) {
+    document.getElementById('policyBody').innerHTML = '<tr><td colspan="3" style="color:var(--accent-red);">Error loading policy</td></tr>';
+  }
+}
+
+// ── Orders ──
+async function loadOrders() {
+  try {
+    const r = await fetch(API + '/api/orders');
+    const orders = await r.json();
+    const tbody = document.getElementById('ordersBody');
+    if (!orders.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px;">No orders yet. Place one above!</td></tr>';
+      return;
+    }
+    tbody.innerHTML = orders.map(o => {
+      const orderId = o.externalOrderId || o.orderId || ('ORD-' + o.id);
+      const canCancel = (o.status === 'PAID' || o.status === 'PLACED');
+      const canRefund = (o.status === 'CANCELLED');
+      return '<tr>' +
+        '<td style="font-family:monospace;font-size:11px;font-weight:600;">' + orderId + '</td>' +
+        '<td>' + (o.customerName || '—') + '</td>' +
+        '<td style="font-weight:600;">₹' + (o.amount ? o.amount.toLocaleString('en-IN') : '—') + '</td>' +
+        '<td><span class="status-pill pill-blue"><i class="fa-solid fa-mobile-screen"></i>' + (o.paymentMethod||'UPI') + '</span></td>' +
+        '<td>' + pillHtml(o.status) + '</td>' +
+        '<td style="display:flex;gap:4px;flex-wrap:wrap;">' +
+          (canCancel ? '<button class="tbl-btn tbl-btn-red" onclick="cancelOrderById(\'' + orderId + '\')"><i class="fa-solid fa-ban"></i> Cancel</button>' : '') +
+          (canRefund ? '<button class="tbl-btn tbl-btn-green" onclick="triggerRefund(\'' + orderId + '\')"><i class="fa-solid fa-rotate-left"></i> Refund</button>' : '') +
+          (!canCancel && !canRefund ? '<span style="color:var(--text-dim);font-size:11px;">—</span>' : '') +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  } catch(e) {
+    document.getElementById('ordersBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--accent-red);">Error loading orders</td></tr>';
+  }
+}
+
+// ── Place Order ──
+async function placeOrder() {
+  const name = document.getElementById('newCustomer').value.trim();
+  const amount = parseFloat(document.getElementById('newAmount').value);
+  const method = document.getElementById('newMethod').value;
+  if (!name || !amount || amount <= 0) { showToast('Please fill customer name and a valid amount', 'error'); return; }
+  try {
+    const r = await fetch(API + '/api/orders/create-and-pay', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customerName: name, amount: amount, paymentMethod: method })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      showToast('Order ' + (d.externalOrderId || d.orderId) + ' placed successfully! ₹' + amount.toLocaleString('en-IN') + ' via ' + method, 'success');
+      document.getElementById('newCustomer').value = '';
+      document.getElementById('newAmount').value = '';
+      loadOrders(); loadSummary();
+    } else { showToast(d.message || 'Order placement failed', 'error'); }
+  } catch(e) { showToast('Network error: ' + e.message, 'error'); }
+}
+
+// ── Cancel Order by ID ──
+async function cancelOrderById(orderId) {
+  if (!confirm('Cancel order ' + orderId + '? This will trigger refund processing.')) return;
+  try {
+    const r = await fetch(API + '/api/simulator/cancel-order?orderId=' + orderId, { method: 'POST' });
+    const d = await r.json();
+    showToast('Order ' + orderId + ' cancelled. Refund processing initiated.', 'warn');
+    loadOrders(); loadRefunds(); loadSummary();
+    document.getElementById('bannerOrderId').textContent = orderId;
+    document.getElementById('receiverBanner').classList.remove('hidden');
+  } catch(e) { showToast('Cancel failed: ' + e.message, 'error'); }
+}
+
+// ── Trigger Refund ──
+async function triggerRefund(orderId) {
+  try {
+    const r = await fetch(API + '/api/simulator/cancel-order?orderId=' + orderId, { method: 'POST' });
+    showToast('Refund triggered for ' + orderId, 'success');
+    loadRefunds(); loadSummary();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// ── Refunds ──
+async function loadRefunds() {
+  if (!AUTH) return;
+  try {
+    const r = await fetch(API + '/api/refunds');
+    const refunds = await r.json();
+    if (!r.ok) throw new Error(refunds.message || r.status);
+    if (can('RISK_VIEW')) {
+      try { const rr = await fetch(API + '/api/risk/latest'); if (rr.ok) riskByRefund = await rr.json(); } catch (e) { riskByRefund = {}; }
+    }
+    const tbody = document.getElementById('refundsBody');
+    refundsById = {};
+    refunds.forEach(rf => refundsById[rf.id] = rf);
+    if (!refunds.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">No refunds yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = refunds.slice().reverse().map(rf => {
+      const statusVal = rf.derivedStatus || rf.status || 'REQUESTED';
+      const refId = rf.providerRefundId || rf.gatewayRefundId || ('rfnd_' + rf.id);
+      const flag = (can('REVIEW_SUBMIT') && FLAGGABLE.includes(statusVal))
+        ? ' <button class="tbl-btn tbl-btn-red" title="Flag as risky and submit for review" onclick="openFlag(' + rf.id + ')"><i class="fa-solid fa-flag"></i> Flag</button>' : '';
+      return '<tr>' +
+        '<td style="font-family:monospace;font-size:11px;font-weight:600;">#' + rf.id + '</td>' +
+        '<td style="font-family:monospace;font-size:11px;">' + esc(rf.orderId||'—') + '</td>' +
+        '<td style="font-weight:600;">₹' + (rf.amount ? rf.amount.toLocaleString('en-IN') : '—') + '</td>' +
+        '<td>' + pillHtml(statusVal) + '</td>' +
+        '<td>' + riskChip(rf.id) + '</td>' +
+        '<td>' + slaChip(rf) + '</td>' +
+        '<td style="font-family:monospace;font-size:10px;color:var(--text-muted);">' + esc(refId) + '</td>' +
+        '<td style="white-space:nowrap;"><button class="tbl-btn tbl-btn-blue" onclick="showTimeline(' + rf.id + ')"><i class="fa-solid fa-timeline"></i> View</button>' + flag + '</td>' +
+      '</tr>';
+    }).join('');
+  } catch(e) {
+    document.getElementById('refundsBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--accent-red);">Error loading refunds</td></tr>';
+  }
+}
+
+// ── Hold-and-release review queue ──
+let pendingReviews = [];
+let bannerReview = null;
+const AWAITING_REVIEWER = ['PENDING', 'UNDER_REVIEW', 'ESCALATED'];
+async function loadReviews() {
+  if (!AUTH || !can('REVIEW_VIEW')) return;
+  const body = document.getElementById('reviewBody');
+  try {
+    const r = await fetch(API + '/api/reviews?status=OPEN');
+    const list = await r.json();
+    if (!r.ok) throw new Error(list.message || r.status);
+    pendingReviews = list;
+    const awaiting = list.filter(rv => AWAITING_REVIEWER.includes(rv.status));
+    const needInfo = list.filter(rv => rv.status === 'MORE_INFO_REQUIRED');
+    // Notification badge: reviewers/admins count cases waiting for a decision; operations count every open case.
+    document.getElementById('alertCount').textContent = can('REVIEW_DECIDE') ? awaiting.length : list.length;
+    if (!list.length) {
+      body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--accent-green);padding:20px;"><i class="fa-solid fa-circle-check"></i> No refunds are waiting for review.</td></tr>';
+      document.getElementById('receiverBanner').classList.add('hidden');
+      bannerReview = null;
+    } else {
+      body.innerHTML = list.map(rv => {
+        const rf = rv.refund || {};
+        const risk = rv.risk ? '<span class="status-pill ' + ({LOW:'pill-blue',MEDIUM:'pill-orange',HIGH:'pill-red',CRITICAL:'pill-red'}[rv.risk.level] || 'pill-gray') + '">' + rv.risk.score + ' &middot; ' + esc(rv.risk.level) + '</span>' : '—';
+        const acts = rv.allowedActions || [];
+        const label = acts.includes('RESUBMIT') ? 'Respond' : (rv.canDecide || acts.includes('START') ? 'Review' : 'View');
+        const open = can('REVIEW_DECIDE') ? 'openCase(' + rv.reviewId + ')' : 'showTimeline(' + rv.refundId + ')';
+        return '<tr><td style="font-family:monospace;font-size:11px;font-weight:600;">#' + rv.refundId + '</td>' +
+          '<td style="font-family:monospace;font-size:11px;">' + esc(rf.orderId || '—') + '</td>' +
+          '<td style="font-weight:600;">' + inr(rf.amount) + '</td><td>' + risk + '</td>' +
+          '<td>' + reviewPill(rv.status) + '</td>' +
+          '<td>' + (rv.heldAt ? new Date(rv.heldAt).toLocaleString('en-IN') : '—') + '</td>' +
+          '<td style="font-size:11px;color:var(--text-muted);max-width:300px;" title="' + esc(rv.holdReason) + '">' + esc((rv.holdReason || '').slice(0, 140)) + '</td>' +
+          '<td><button class="tbl-btn tbl-btn-blue" onclick="' + open + '"><i class="fa-solid fa-clipboard-check"></i> ' + label + '</button></td></tr>';
+      }).join('');
+      // Banner: operations see cases returned to them first; reviewers see cases waiting for a decision.
+      const opsFirst = can('REVIEW_SUBMIT') && needInfo.length;
+      const focus = opsFirst ? needInfo : (awaiting.length ? awaiting : []);
+      if (!focus.length) {
+        document.getElementById('receiverBanner').classList.add('hidden');
+        bannerReview = null;
+      } else {
+        bannerReview = focus[0];
+        const rf = bannerReview.refund || {};
+        document.getElementById('bannerOrderId').textContent = rf.orderId || ('refund #' + bannerReview.refundId);
+        document.getElementById('bannerAmount').textContent = inr(rf.amount);
+        document.getElementById('bannerTitle').textContent = opsFirst
+          ? needInfo.length + ' review case(s) need more information from operations'
+          : awaiting.length + ' refund(s) held for review';
+        document.getElementById('receiverBanner').classList.remove('hidden');
+      }
+    }
+  } catch (e) {
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--accent-red);">Error loading review queue</td></tr>';
+  }
+}
+function openBannerReview() {
+  if (!bannerReview) return;
+  if (can('REVIEW_DECIDE') && bannerReview.status !== 'MORE_INFO_REQUIRED') openCase(bannerReview.reviewId);
+  else showTimeline(bannerReview.refundId);
+}
+
+// ── Timeline ──
+async function showTimeline(refundId) {
+  currentRefundIdForTimeline = refundId;
+  document.getElementById('timelineModal').classList.remove('hidden');
+  const box = document.getElementById('timelineBody');
+  box.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);">Loading...</div>';
+  try {
+    const [tr, rr, vr] = await Promise.all([
+      fetch(API + '/api/refunds/' + refundId + '/timeline'),
+      can('RISK_VIEW') ? fetch(API + '/api/refunds/' + refundId + '/risk') : Promise.resolve(null),
+      can('REVIEW_VIEW') ? fetch(API + '/api/refunds/' + refundId + '/review') : Promise.resolve(null)
+    ]);
+    const events = await tr.json();
+    if (!tr.ok) throw new Error(events.message || tr.status);
+    const risk = rr && rr.ok ? await rr.json() : null;
+    const review = vr && vr.ok ? await vr.json() : null;
+    box.innerHTML = riskPanelHtml(refundId, risk) + reviewPanelHtml(refundId, review) + timelineHtml(events);
+  } catch(e) {
+    box.innerHTML = '<div style="color:var(--accent-red);">Failed to load details: ' + esc(e.message) + '</div>';
+  }
+}
+
+function timelineHtml(events) {
+  const colors = { RAZORPAY: ['#388bfd','bolt'], MERCHANT_STORE: ['#8957e5','store'], BANK_SETTLEMENT: ['#d29922','building-columns'],
+                   WEBHOOK: ['#388bfd','bolt'], SYSTEM: ['#3fb950','gear'], SETTLEMENT: ['#d29922','building-columns'], USER: ['#8957e5','user'],
+                   REVIEW_WORKFLOW: ['#d29922','user-shield'], RISK_ENGINE: ['#8957e5','calculator'] };
+  return '<div class="section-title" style="margin-top:14px;">Audit timeline</div>' + events.map(ev => {
+    const [col, ico] = colors[ev.source] || ['#8b949e','circle'];
+    let note = ev.notes || '';
+    if ((ev.source === 'REVIEW_WORKFLOW' || ev.source === 'RISK_ENGINE') && ev.rawPayload) { try { note = JSON.parse(ev.rawPayload).summary || ''; } catch (e) {} }
+    return '<div class="timeline-item">' +
+      '<div class="timeline-dot" style="background:' + col + '20;border-color:' + col + ';color:' + col + '"><i class="fa-solid fa-' + ico + '" style="font-size:9px;"></i></div>' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:12px;font-weight:600;color:var(--text-primary);">' + esc(ev.eventType.replace(/[_.]/g,' ')) + '</div>' +
+        '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">' + esc(note) + '</div>' +
+        '<div style="font-size:10px;color:var(--text-dim);margin-top:4px;display:flex;gap:12px;">' +
+          '<span><i class="fa-regular fa-clock"></i> ' + new Date(ev.eventTime || ev.createdAt).toLocaleString('en-IN') + '</span>' +
+          '<span style="padding:1px 6px;border-radius:3px;background:' + col + '20;color:' + col + ';font-weight:600;">' + esc(ev.source) + '</span>' +
+        '</div>' +
+      '</div></div>';
+  }).join('');
+}
+
+function riskPanelHtml(refundId, risk) {
+  if (!risk) return '';
+  const head = '<div class="section-title">Risk assessment <span style="font-size:10px;font-weight:400;color:var(--text-muted);">rule-based &middot; not a machine-learning model</span></div>';
+  const reassess = can('RISK_ASSESS') ? '<button class="tbl-btn tbl-btn-blue" id="reassessBtn" onclick="reassessRisk(' + refundId + ')"><i class="fa-solid fa-rotate"></i> Reassess now</button>' : '';
+  if (!risk.assessed) return '<div style="background:var(--bg-card2);padding:12px;border-radius:6px;margin-bottom:10px;">' + head +
+    '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">' + esc(risk.message) + '</div>' + reassess + '</div>';
+  const c = risk.current;
+  const col = { LOW: '#388bfd', MEDIUM: '#d29922', HIGH: '#f85149', CRITICAL: '#f85149' }[c.level] || '#8b949e';
+  const ind = (c.indicators || []).map(i => '<li><strong>+' + i.points + '</strong> ' + esc(i.reason) + '</li>').join('') || '<li>No rule triggered.</li>';
+  const ne = (c.notEvaluated || []).map(n => '<li>' + esc(n) + '</li>').join('');
+  return '<div style="background:var(--bg-card2);padding:12px;border-radius:6px;margin-bottom:10px;border-left:3px solid ' + col + ';">' + head +
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="font-size:26px;font-weight:800;color:' + col + ';">' + c.score + '<span style="font-size:12px;color:var(--text-muted);">/100</span></span>' +
+    pillHtml(c.level) + (c.wouldHold ? '<span class="status-pill pill-orange">meets hold criteria</span>' : '') + '<span style="flex:1"></span>' + reassess + '</div>' +
+    '<div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;">Assessed ' + new Date(c.assessedAt).toLocaleString('en-IN') + ' &middot; ' + esc(c.engineVersion) + ' &middot; trigger ' + esc(c.trigger || '') + '</div>' +
+    (c.stale ? '<div style="font-size:12px;color:#d29922;margin-bottom:6px;">&#9888; This assessment is outdated: ' + esc(c.staleReason) + ' Reassess before relying on it.</div>' : '') +
+    '<ul style="font-size:12px;margin:0 0 6px 18px;color:var(--text-primary);">' + ind + '</ul>' +
+    (ne ? '<div style="font-size:11px;color:var(--text-muted);">Not evaluated (data unavailable):</div><ul style="font-size:11px;margin:2px 0 0 18px;color:var(--text-muted);">' + ne + '</ul>' : '') +
+  '</div>';
+}
+
+function reviewPanelHtml(refundId, review) {
+  if (!review) return '';
+  const rows = (review.reviews || []).map(rv => {
+    const decided = !rv.open;
+    return '<div style="font-size:12px;margin-bottom:6px;">' + reviewPill(rv.status) + ' ' + originLabel(rv) +
+      ' &middot; held ' + fmtDate(rv.heldAt) +
+      (rv.status === 'UNDER_REVIEW' && rv.assignedTo ? ' &middot; under review by <strong>' + esc(rv.assignedTo) + '</strong>' : '') +
+      (rv.submissionReason ? '<div style="color:var(--text-muted);margin-top:2px;">Flagged by <strong>' + esc(rv.submittedBy) + '</strong>: ' + esc(rv.submissionReason) + '</div>' : '') +
+      (rv.status === 'MORE_INFO_REQUIRED' ? '<div style="color:#d29922;margin-top:2px;"><i class="fa-solid fa-circle-question"></i> More information requested by <strong>' + esc(rv.infoRequestedBy) + '</strong>: ' + esc(rv.infoRequestReason) + '</div>' : '') +
+      (rv.status === 'ESCALATED' ? '<div style="color:#f85149;margin-top:2px;"><i class="fa-solid fa-arrow-up"></i> Escalated by <strong>' + esc(rv.escalatedBy) + '</strong>: ' + esc(rv.escalationReason) + '</div>' : '') +
+      (decided ? ' &middot; ' + (rv.decidedBy === 'SYSTEM' ? 'closed automatically' : 'decided by <strong>' + esc(rv.decidedBy) + '</strong> (' + esc(rv.decidedByRole) + ')') +
+        (rv.decidedAt ? ' on ' + new Date(rv.decidedAt).toLocaleString('en-IN') : '') +
+        '<div style="color:var(--text-muted);margin-top:2px;">Reason: ' + esc(rv.decisionReason) + (rv.simulatedRelease ? ' <em>(release was SIMULATED - no real payment)</em>' : '') + '</div>' : '') + '</div>';
+  }).join('');
+  const acts = review.allowedActions || [];
+  let extra = '';
+  if (review.openReviewId && can('REVIEW_DECIDE')) {
+    extra += '<button class="tbl-btn tbl-btn-orange rv-action-btn" style="margin:4px 0 8px;" onclick="closeModal(\'timelineModal\');openCase(' + review.openReviewId + ')"><i class="fa-solid fa-folder-open"></i> Open case #' + review.openReviewId + ' in Reviewer Dashboard</button>';
+  }
+  if (acts.includes('RESUBMIT')) {
+    extra += '<div style="margin-top:8px;"><label style="font-size:11px;color:var(--text-muted);">Information for the reviewer (required, 5-500 characters)</label>' +
+      '<textarea id="resubmitText" rows="3" maxlength="500" class="form-input" style="margin:4px 0 8px;"></textarea>' +
+      '<div id="resubmitMsg" style="font-size:12px;min-height:16px;margin-bottom:6px;"></div>' +
+      '<button id="resubmitBtn" class="tbl-btn tbl-btn-green rv-action-btn" onclick="resubmitFromPanel(' + review.openReviewId + ',' + refundId + ')"><i class="fa-solid fa-paper-plane"></i> Resubmit for review</button></div>';
+  }
+  if (review.canSubmit) {
+    extra += '<button class="tbl-btn tbl-btn-red rv-action-btn" style="margin-top:4px;" onclick="openFlag(' + refundId + ')"><i class="fa-solid fa-flag"></i> Flag as risky / submit for review</button>';
+  }
+  if (!rows && !extra && !review.canDecide) return '';
+  const form = review.canDecide ?
+    '<div style="margin-top:8px;"><label style="font-size:11px;color:var(--text-muted);">Decision reason (required, 5-500 characters)</label>' +
+    '<textarea id="reviewReason" rows="3" maxlength="500" style="width:100%;margin:4px 0 8px;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-primary);"></textarea>' +
+    '<div id="reviewMsg" style="font-size:12px;min-height:16px;margin-bottom:6px;"></div>' +
+    '<div style="display:flex;gap:8px;"><button id="rejectBtn" class="btn-disapprove" onclick="submitDecision(' + refundId + ',\'reject\')"><i class="fa-solid fa-xmark"></i> Reject</button>' +
+    '<button id="approveBtn" class="btn-approve" onclick="submitDecision(' + refundId + ',\'approve\')"><i class="fa-solid fa-check"></i> Approve (simulated release)</button></div></div>' : '';
+  return '<div style="background:var(--bg-card2);padding:12px;border-radius:6px;margin-bottom:10px;border-left:3px solid #d29922;"><div class="section-title">Hold &amp; release review</div>' + rows + extra + form + '</div>';
+}
+
+async function reassessRisk(refundId) {
+  const btn = document.getElementById('reassessBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Reassessing…'; }
+  try {
+    const r = await fetch(API + '/api/refunds/' + refundId + '/risk/reassess', { method: 'POST' });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || r.status);
+    showToast(d.heldNow ? 'Reassessed: refund placed ON HOLD' : 'Risk reassessed: ' + d.score + ' (' + d.level + ')', d.heldNow ? 'warn' : 'success');
+    await showTimeline(refundId); loadRefunds(); loadReviews(); loadSummary();
+  } catch (e) { showToast('Reassess failed: ' + e.message, 'error'); if (btn) btn.disabled = false; }
+}
+
+async function submitDecision(refundId, action) {
+  const reason = (document.getElementById('reviewReason').value || '').trim();
+  const msg = document.getElementById('reviewMsg');
+  if (reason.length < 5) { msg.style.color = '#f85149'; msg.textContent = 'Please enter a reason of at least 5 characters.'; return; }
+  const ap = document.getElementById('approveBtn'), rj = document.getElementById('rejectBtn');
+  ap.disabled = rj.disabled = true;
+  msg.style.color = 'var(--text-muted)'; msg.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting decision…';
+  try {
+    const r = await fetch(API + '/api/refunds/' + refundId + '/review/' + action, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || ('HTTP ' + r.status));
+    showToast(d.message, action === 'approve' ? 'success' : 'warn');
+    await showTimeline(refundId); loadRefunds(); loadReviews(); loadCases(); loadSummary();
+    if (can('REVIEW_DECIDE')) loadReviewerDashboard();
+  } catch (e) {
+    msg.style.color = '#f85149'; msg.textContent = 'Decision not recorded: ' + e.message;
+    ap.disabled = rj.disabled = false;
+    loadReviews();
+  }
+}
+
+// ── Reviewer workflow: dashboard, case details, flag / resubmit ──
+const FLAGGABLE = ['REQUESTED','GATEWAY_PENDING','GATEWAY_PROCESSED','POTENTIAL_DELAY','SLA_BREACHED','FAILED_REPORTED'];
+let refundsById = {};
+const REVIEW_LABELS = { PENDING: 'Pending review', UNDER_REVIEW: 'Under review', MORE_INFO_REQUIRED: 'More info required',
+  ESCALATED: 'Escalated', APPROVED: 'Approved for release', REJECTED: 'Rejected', SUPERSEDED: 'Superseded' };
+function reviewPill(status) {
+  return pillHtml(status || 'PENDING').replace(/<\/i>[^<]*<\/span>$/, '</i>' + esc(REVIEW_LABELS[status] || status || '') + '</span>');
+}
+function originLabel(rv) {
+  return rv.origin === 'MANUAL'
+    ? '<span class="status-pill pill-blue" title="Flagged for review by a user"><i class="fa-solid fa-flag"></i>FLAGGED</span>'
+    : '<span class="status-pill pill-gray" title="Held by the rule-based risk engine"><i class="fa-solid fa-robot"></i>RISK ENGINE</span>';
+}
+function fmtDate(d) { return d ? new Date(d).toLocaleString('en-IN') : '—'; }
+function ago(d) {
+  if (!d) return '';
+  const mins = Math.max(0, Math.round((Date.now() - new Date(d).getTime()) / 60000));
+  if (mins < 60) return mins + ' min ago';
+  const h = Math.round(mins / 60);
+  return h < 48 ? h + ' h ago' : Math.round(h / 24) + ' d ago';
+}
+function riskPill(risk) {
+  if (!risk) return '<span style="font-size:10px;color:var(--text-dim);">not assessed</span>';
+  const cls = { LOW: 'pill-blue', MEDIUM: 'pill-orange', HIGH: 'pill-red', CRITICAL: 'pill-red' }[risk.level] || 'pill-gray';
+  return '<span class="status-pill ' + cls + '">' + esc(risk.score) + ' &middot; ' + esc(risk.level) + '</span>';
+}
+function refreshReviewViews() {
+  if (can('REVIEW_DECIDE')) loadReviewerDashboard();
+  loadReviews(); loadRefunds(); loadSummary();
+  if (can('CASE_VIEW')) loadCases();
+}
+
+async function loadReviewerDashboard() {
+  if (!AUTH || !can('REVIEW_DECIDE')) return;
+  loadReviewerSummary();
+  loadReviewerQueue();
+}
+
+async function loadReviewerSummary() {
+  const ids = ['rv-pending','rv-high','rv-sla','rv-esc','rv-info','rv-done'];
+  try {
+    const r = await fetch(API + '/api/reviews/summary');
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || r.status);
+    document.getElementById('rv-pending').textContent = d.pending ?? 0;
+    document.getElementById('rv-pending-sub').textContent = (d.underReview || 0) + ' under review' + (d.myInProgress ? ' (' + d.myInProgress + ' yours)' : '');
+    document.getElementById('rv-high').textContent = d.highRisk ?? 0;
+    document.getElementById('rv-sla').textContent = d.slaBreached ?? 0;
+    document.getElementById('rv-esc').textContent = d.escalated ?? 0;
+    document.getElementById('rv-info').textContent = d.moreInfoRequired ?? 0;
+    document.getElementById('rv-done').textContent = d.completed ?? 0;
+    document.getElementById('rv-done-sub').textContent = (d.approved || 0) + ' approved · ' + (d.rejected || 0) + ' rejected';
+  } catch (e) {
+    ids.forEach(id => document.getElementById(id).textContent = '—');
+  }
+}
+
+let rvQueue = [];
+async function loadReviewerQueue() {
+  if (!AUTH || !can('REVIEW_DECIDE')) return;
+  const body = document.getElementById('rvBody');
+  if (!rvQueue.length) body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading review cases…</td></tr>';
+  try {
+    const status = document.getElementById('rvStatus').value || 'OPEN';
+    const r = await fetch(API + '/api/reviews?status=' + encodeURIComponent(status));
+    const list = await r.json();
+    if (!r.ok) throw new Error(list.message || r.status);
+    rvQueue = list;
+    renderReviewerQueue();
+  } catch (e) {
+    rvQueue = [];
+    document.getElementById('rvCount').textContent = '';
+    body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--accent-red);padding:20px;"><i class="fa-solid fa-circle-xmark"></i> Could not load the review queue: ' + esc(e.message) +
+      ' <button class="tbl-btn tbl-btn-blue" onclick="loadReviewerQueue()">Retry</button></td></tr>';
+  }
+}
+
+function renderReviewerQueue() {
+  const body = document.getElementById('rvBody');
+  const q = (document.getElementById('rvSearch').value || '').trim().toLowerCase();
+  const risk = document.getElementById('rvRisk').value;
+  const origin = document.getElementById('rvOrigin').value;
+  const slaOnly = document.getElementById('rvSlaOnly').checked;
+  const mine = document.getElementById('rvMine').checked;
+  const rows = rvQueue.filter(rv => {
+    const rf = rv.refund || {};
+    const lvl = rv.risk ? rv.risk.level : null;
+    if (risk === 'HIGHPLUS' && lvl !== 'HIGH' && lvl !== 'CRITICAL') return false;
+    if (risk && risk !== 'HIGHPLUS' && lvl !== risk) return false;
+    if (origin && rv.origin !== origin) return false;
+    if (slaOnly && !rv.slaBreached) return false;
+    if (mine && !(ME && rv.assignedTo && rv.assignedTo.toLowerCase() === ME.username.toLowerCase())) return false;
+    if (q) {
+      const hay = ['#' + rv.reviewId, '#' + rv.refundId, rf.orderId, rv.submittedBy, rv.submissionReason, rv.holdReason,
+                   rv.assignedTo, rv.status, REVIEW_LABELS[rv.status]].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  document.getElementById('rvCount').textContent = '(' + rows.length + ' of ' + rvQueue.length + ')';
+  if (!rvQueue.length) {
+    body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--accent-green);padding:20px;"><i class="fa-solid fa-circle-check"></i> No review cases in this view &mdash; the queue is clear.</td></tr>';
+    return;
+  }
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;">No cases match the current search / filters.</td></tr>';
+    return;
+  }
+  body.innerHTML = rows.map(rv => {
+    const rf = rv.refund || {};
+    const acts = rv.allowedActions || [];
+    const issues = (rv.openIssues || []).map(t => '<div style="margin-top:2px;">' + pillHtml(t) + '</div>').join('');
+    const actionable = acts.some(a => a !== 'NOTE');
+    return '<tr>' +
+      '<td style="font-family:monospace;font-size:11px;font-weight:600;">#' + rv.reviewId + '</td>' +
+      '<td style="font-family:monospace;font-size:11px;">#' + rv.refundId + '<div style="color:var(--text-muted);">' + esc(rf.orderId || '—') + '</div></td>' +
+      '<td style="font-weight:600;">' + inr(rf.amount) + '</td>' +
+      '<td>' + riskPill(rv.risk) + issues + '</td>' +
+      '<td>' + reviewPill(rv.status) + (rv.assignedTo && rv.status === 'UNDER_REVIEW' ? '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">by ' + esc(rv.assignedTo) + '</div>' : '') + '</td>' +
+      '<td style="font-size:11px;">' + fmtDate(rv.heldAt) + '<div style="font-size:10px;color:var(--text-dim);">' + ago(rv.heldAt) + '</div></td>' +
+      '<td>' + originLabel(rv) + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">' + esc(rv.submittedBy || 'SYSTEM') + '</div></td>' +
+      '<td>' + slaChip(rf) + '</td>' +
+      '<td><button class="tbl-btn ' + (actionable ? 'tbl-btn-orange' : 'tbl-btn-blue') + '" onclick="openCase(' + rv.reviewId + ')"><i class="fa-solid fa-folder-open"></i> ' + (actionable ? 'Review' : 'View') + '</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ── Case details ──
+const RV_ACTIONS = [
+  // [action, url path, label, icon, button class, reason required]
+  ['START', 'start', 'Start Review', 'play', 'tbl-btn-blue', false],
+  ['REQUEST_INFO', 'request-info', 'Request More Information', 'circle-question', 'tbl-btn-orange', true],
+  ['ESCALATE', 'escalate', 'Escalate', 'arrow-up', 'tbl-btn-purple', true],
+  ['REJECT', 'reject', 'Reject Release', 'ban', 'tbl-btn-red', true],
+  ['APPROVE', 'approve', 'Approve Release (simulated)', 'check', 'tbl-btn-green', true],
+  ['RESUBMIT', 'resubmit', 'Resubmit for Review', 'paper-plane', 'tbl-btn-green', true],
+  ['NOTE', 'notes', 'Add Note', 'note-sticky', 'tbl-btn-blue', true],
+];
+const ACTIVITY_STYLE = {
+  'review.held': ['#d29922','hand'], 'review.submitted': ['#f85149','flag'], 'review.started': ['#388bfd','play'],
+  'review.note': ['#8957e5','note-sticky'], 'review.info_requested': ['#d29922','circle-question'],
+  'review.resubmitted': ['#3fb950','paper-plane'], 'review.escalated': ['#f85149','arrow-up'],
+  'review.approved': ['#3fb950','check'], 'review.rejected': ['#f85149','ban'],
+  'review.released.simulated': ['#3fb950','flask'], 'review.superseded': ['#8b949e','forward']
+};
+let currentCaseId = null;
+
+async function openCase(reviewId) {
+  currentCaseId = reviewId;
+  document.getElementById('reviewCaseModal').classList.remove('hidden');
+  document.getElementById('reviewCaseTitle').textContent = 'Review case #' + reviewId;
+  const box = document.getElementById('reviewCaseBody');
+  box.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading case details…</div>';
+  try {
+    const r = await fetch(API + '/api/reviews/' + reviewId);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || ('HTTP ' + r.status));
+    if (currentCaseId !== reviewId) return;
+    box.innerHTML = caseHtml(d);
+  } catch (e) {
+    box.innerHTML = '<div style="color:var(--accent-red);padding:12px;"><i class="fa-solid fa-circle-xmark"></i> Could not load case #' + esc(reviewId) + ': ' + esc(e.message) +
+      ' <button class="tbl-btn tbl-btn-blue" onclick="openCase(' + Number(reviewId) + ')">Retry</button></div>';
+  }
+}
+
+function kvHtml(pairs) {
+  // values are already-escaped HTML; empty values are skipped
+  return '<div class="kv">' + pairs.filter(p => p[1] !== undefined && p[1] !== null && p[1] !== '')
+    .map(p => '<div>' + p[0] + '</div><div>' + p[1] + '</div>').join('') + '</div>';
+}
+
+function caseHtml(d) {
+  const rv = d.review || {}, rf = d.refund || {}, o = d.order || {}, risk = d.risk || {}, ind = d.indicators || {};
+  const cur = risk.current, atSub = risk.atSubmission;
+
+  const head = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">' +
+      reviewPill(rv.status) + originLabel(rv) + (cur ? riskPill(cur) : '') + pillHtml(rf.derivedStatus || 'REQUESTED') + slaChip(rf) + '</div>' +
+    '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;padding:8px 10px;border-left:3px solid #d29922;background:var(--bg-card2);border-radius:4px;">' +
+      '<i class="fa-solid fa-circle-info" style="color:#d29922;"></i> ' + esc(d.releaseNotice) + '</div>';
+
+  const refundPanel = '<div class="rv-panel"><div class="section-title">Refund &amp; order</div>' + kvHtml([
+    ['Refund', '#' + esc(rf.id) + (rf.providerRefundId ? ' &middot; <span style="font-family:monospace;">' + esc(rf.providerRefundId) + '</span>' : '')],
+    ['Order', '<span style="font-family:monospace;">' + esc(rf.orderId) + '</span>' + (o.status ? ' ' + pillHtml(o.status) : '')],
+    ['Amount', '<strong>' + inr(rf.amount) + '</strong> ' + esc(rf.currency || '')],
+    ['Payment method', esc(rf.paymentMethod)],
+    ['Refund status', pillHtml(rf.derivedStatus || 'REQUESTED') + (rv.previousStatus ? ' <span style="font-size:10px;color:var(--text-muted);">before hold: ' + esc(rv.previousStatus) + '</span>' : '')],
+    ['Gateway stage', esc(rf.gatewayStage)],
+    ['Customer', esc(o.customerName) + (o.customerEmail ? ' &middot; ' + esc(o.customerEmail) : '')],
+    ['Order amount', o.amount != null ? inr(o.amount) : ''],
+    ['Requested', fmtDate(rf.requestedAt)],
+    ['RBI TAT deadline', rf.slaDueAt ? fmtDate(rf.slaDueAt) + ' (T+' + esc(rf.slaTatDays) + ')' : 'Not tracked'],
+    ['Bank settlement', rf.settledAt ? fmtDate(rf.settledAt) + ' &middot; ' + inr(rf.settledAmount) + (rf.bankUtr ? ' &middot; UTR ' + esc(rf.bankUtr) : '') : 'Not settled']
+  ]) + '</div>';
+
+  const subPanel = '<div class="rv-panel"><div class="section-title">Submission &amp; status</div>' + kvHtml([
+    ['Case status', reviewPill(rv.status)],
+    ['Origin', rv.origin === 'MANUAL' ? 'Flagged by a user' : 'Held by the rule-based risk engine'],
+    ['Submitted by', esc(rv.submittedBy) + (rv.submittedByRole ? ' (' + esc(rv.submittedByRole) + ')' : '')],
+    ['Submitted at', fmtDate(rv.heldAt) + ' &middot; ' + ago(rv.heldAt)],
+    ['Reason', esc(rv.submissionReason || rv.holdReason)],
+    ['Assigned to', rv.assignedTo ? esc(rv.assignedTo) + (rv.reviewStartedAt ? ' since ' + fmtDate(rv.reviewStartedAt) : '') : ''],
+    ['Info requested', rv.infoRequestedAt ? esc(rv.infoRequestedBy) + ', ' + fmtDate(rv.infoRequestedAt) + ': ' + esc(rv.infoRequestReason) : ''],
+    ['Resubmissions', rv.resubmissionCount ? esc(rv.resubmissionCount) : ''],
+    ['Escalated', rv.escalatedAt ? esc(rv.escalatedBy) + ', ' + fmtDate(rv.escalatedAt) + ': ' + esc(rv.escalationReason) : ''],
+    ['Decision', rv.decidedAt ? esc(REVIEW_LABELS[rv.status] || rv.status) + ' by ' + esc(rv.decidedBy) + (rv.decidedByRole ? ' (' + esc(rv.decidedByRole) + ')' : '') + ', ' + fmtDate(rv.decidedAt) : ''],
+    ['Decision reason', rv.decisionReason ? esc(rv.decisionReason) + (rv.simulatedRelease ? ' <em>(release SIMULATED - no real payment)</em>' : '') : '']
+  ]) + '</div>';
+
+  let riskPanel = '<div class="rv-panel"><div class="section-title">Risk <span style="font-size:10px;font-weight:400;color:var(--text-muted);">rule-based &middot; not machine learning</span></div>';
+  if (!cur) {
+    riskPanel += '<div style="font-size:12px;color:var(--text-muted);">No risk assessment recorded for this refund.</div>';
+  } else {
+    const ul = (cur.indicators || []).map(i => '<li><strong>+' + esc(i.points) + '</strong> ' + esc(i.reason) + '</li>').join('') || '<li>No rule triggered.</li>';
+    riskPanel += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;"><span style="font-size:24px;font-weight:800;">' + esc(cur.score) +
+        '<span style="font-size:12px;color:var(--text-muted);">/100</span></span>' + pillHtml(cur.level) +
+        '<span style="font-size:10px;color:var(--text-dim);">assessed ' + fmtDate(cur.assessedAt) + ' &middot; ' + esc(cur.trigger || '') + '</span></div>' +
+      (cur.stale ? '<div style="font-size:11px;color:#d29922;margin-bottom:6px;">&#9888; Outdated: ' + esc(cur.staleReason) + '</div>' : '') +
+      '<ul style="font-size:12px;margin:0 0 6px 18px;">' + ul + '</ul>';
+    if (atSub && atSub.assessmentId !== cur.assessmentId) {
+      riskPanel += '<div style="font-size:11px;color:var(--text-muted);">At submission: <strong>' + esc(atSub.score) + '/100 ' + esc(atSub.level) + '</strong> (' + fmtDate(atSub.assessedAt) + ')</div>';
+    }
+    const hist = (risk.history || []).slice(0, 6).map(h => esc(h.score) + ' ' + esc(h.level) + ' <span style="color:var(--text-dim);">' + fmtDate(h.assessedAt) + '</span>').join(' &middot; ');
+    if (hist) riskPanel += '<div style="font-size:10px;color:var(--text-muted);margin-top:4px;">History: ' + hist + '</div>';
+  }
+  riskPanel += '</div>';
+
+  const flag = (on, label, icon) => '<span class="status-pill ' + (on ? 'pill-red' : 'pill-gray') + '"><i class="fa-solid fa-' + icon + '"></i>' + label + (on ? '' : ': NO') + '</span>';
+  const indPanel = '<div class="rv-panel"><div class="section-title">Mismatch, duplicate &amp; SLA indicators</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">' +
+      flag(ind.amountMismatch, 'AMOUNT MISMATCH', 'not-equal') + flag(ind.duplicateSettlement, 'DUPLICATE SETTLEMENT', 'clone') +
+      flag(ind.refundFailed, 'REFUND FAILED', 'circle-xmark') + flag(ind.slaBreached, 'SLA BREACHED', 'stopwatch') + '</div>' +
+    '<div style="font-size:11px;color:var(--text-muted);">' + (ind.daysOverdue > 0 ? esc(ind.daysOverdue) + ' day(s) overdue &middot; est. compensation ' + inr(ind.compensationDue) + ' &middot; ' : '') +
+      esc(ind.settlementRows || 0) + ' settlement row(s) linked</div>' +
+    relatedCasesHtml(d.relatedCases) + settlementsHtml(d.settlements) + '</div>';
+
+  const activity = (d.activity || []).slice().reverse().map(a => {
+    const [col, ico] = ACTIVITY_STYLE[a.type] || ['#8b949e', 'circle'];
+    return '<div class="timeline-item"><div class="timeline-dot" style="background:' + col + '20;border-color:' + col + ';color:' + col + '"><i class="fa-solid fa-' + ico + '" style="font-size:9px;"></i></div>' +
+      '<div style="flex:1;"><div style="font-size:12px;font-weight:600;">' + esc((a.type || '').replace(/^review\./, '').replace(/[_.]/g, ' ')) +
+        (a.actor ? ' &middot; <span style="font-weight:400;color:var(--text-muted);">' + esc(a.actor) + (a.actorRole ? ' (' + esc(a.actorRole) + ')' : '') + '</span>' : '') + '</div>' +
+        '<div style="font-size:12px;color:var(--text-primary);margin-top:2px;white-space:pre-wrap;">' + esc(a.text || a.summary || '') + '</div>' +
+        '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;"><i class="fa-regular fa-clock"></i> ' + fmtDate(a.at) + (a.reviewStatus ? ' &middot; case ' + esc(REVIEW_LABELS[a.reviewStatus] || a.reviewStatus) : '') + '</div></div></div>';
+  }).join('');
+  const notesPanel = '<div class="rv-panel"><div class="section-title">Investigation notes &amp; decision history (this case, newest first)</div>' +
+    (activity || '<div style="font-size:12px;color:var(--text-muted);">No activity recorded yet.</div>') + '</div>';
+
+  const prev = (d.previousReviews || []).map(p => '<div style="font-size:12px;margin-bottom:4px;">Case #' + esc(p.reviewId) + ' ' + reviewPill(p.status) +
+    ' held ' + fmtDate(p.heldAt) + (p.decidedBy ? ' &middot; ' + esc(p.decidedBy) + ': ' + esc(p.decisionReason) : '') + '</div>').join('');
+  const prevPanel = prev ? '<div class="rv-panel"><div class="section-title">Earlier review cases of this refund</div>' + prev + '</div>' : '';
+
+  return head + actionPanelHtml(d) +
+    '<div class="two-col" style="margin-bottom:0;">' + refundPanel + subPanel + '</div>' +
+    '<div class="two-col" style="margin-bottom:0;">' + riskPanel + indPanel + '</div>' +
+    notesPanel + prevPanel +
+    '<div class="rv-panel">' + timelineHtml(d.timeline || []).replace('margin-top:14px;', 'margin-top:0;').replace('Audit timeline', 'Audit timeline (refund ledger)') + '</div>';
+}
+
+function relatedCasesHtml(list) {
+  if (!list || !list.length) return '<div style="font-size:11px;color:var(--text-dim);margin-top:6px;">No related discrepancy cases.</div>';
+  return '<div class="table-wrap" style="margin-top:8px;max-height:180px;"><table><thead><tr><th>Case</th><th>Issue</th><th>Severity</th><th>Status</th><th>Opened</th></tr></thead><tbody>' +
+    list.map(c => '<tr title="' + esc(c.hypothesis) + '"><td>#' + esc(c.id) + '</td><td>' + pillHtml(c.issueType || 'OPEN') + '</td><td>' +
+      pillHtml(c.severity || 'MEDIUM') + '</td><td>' + pillHtml(c.status || 'OPEN') + '</td><td>' + fmtDate(c.createdAt) + '</td></tr>').join('') + '</tbody></table></div>';
+}
+
+function settlementsHtml(list) {
+  if (!list || !list.length) return '';
+  return '<div class="table-wrap" style="margin-top:8px;max-height:150px;"><table><thead><tr><th>UTR</th><th>Amount</th><th>Settled</th><th>File</th><th>Matched</th></tr></thead><tbody>' +
+    list.map(s => '<tr><td style="font-family:monospace;font-size:11px;">' + esc(s.utrNumber) + '</td><td>' + inr(s.amount) + '</td><td>' + esc(s.settlementDate || '—') +
+      '</td><td style="font-size:10px;">' + esc(s.fileId || '') + '</td><td>' + (s.isMatched ? 'yes' : 'no') + '</td></tr>').join('') + '</tbody></table></div>';
+}
+
+function actionPanelHtml(d) {
+  const rv = d.review || {};
+  const allowed = d.allowedActions || [];
+  if (!allowed.length) {
+    let why = rv.open ? 'You cannot act on this case right now.' : 'This case is closed (' + (REVIEW_LABELS[rv.status] || rv.status) + ') and shown read-only.';
+    if (rv.open && rv.status === 'ESCALATED') why = 'This case was escalated. Only an ADMIN can decide it.';
+    else if (rv.open && rv.status === 'MORE_INFO_REQUIRED') why = 'Waiting for operations to add the requested information and resubmit.';
+    else if (rv.open && rv.status === 'UNDER_REVIEW' && rv.assignedTo) why = 'Under review by ' + rv.assignedTo + '.';
+    return '<div class="rv-panel" style="border-left:3px solid #8b949e;font-size:12px;color:var(--text-muted);"><i class="fa-solid fa-lock"></i> ' + esc(why) + '</div>';
+  }
+  const btns = RV_ACTIONS.filter(a => allowed.includes(a[0])).map(a =>
+    '<button class="tbl-btn ' + a[4] + ' rv-action-btn rv-act" onclick="caseAction(' + Number(rv.reviewId) + ',\'' + a[0] + '\')"><i class="fa-solid fa-' + a[3] + '"></i> ' + a[2] + '</button>').join('');
+  const ownCase = rv.origin === 'MANUAL' && ME && rv.submittedBy && rv.submittedBy.toLowerCase() === ME.username.toLowerCase() && rv.open;
+  return '<div class="rv-panel" style="border-left:3px solid #d29922;"><div class="section-title">Review actions</div>' +
+    '<label style="font-size:11px;color:var(--text-muted);">Decision reason / note (required for every action except Start Review; 5-500 characters)</label>' +
+    '<textarea id="caseText" rows="3" maxlength="500" class="form-input" style="margin:4px 0 8px;"></textarea>' +
+    '<div id="caseMsg" style="font-size:12px;min-height:16px;margin-bottom:6px;"></div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;">' + btns + '</div>' +
+    (ownCase ? '<div style="font-size:11px;color:#d29922;margin-top:8px;"><i class="fa-solid fa-user-lock"></i> You submitted this case, so a different reviewer must approve or reject it (four-eyes rule).</div>' : '') +
+    '<div style="font-size:10px;color:var(--text-dim);margin-top:8px;">Approval returns the refund to normal processing. The release is <strong>simulated</strong>: RefundGuard does not initiate any real payment.</div></div>';
+}
+
+function setCaseMsg(msg, kind, isHtml) {
+  const el = document.getElementById('caseMsg');
+  if (!el) return;
+  el.style.color = kind === 'error' ? '#f85149' : kind === 'ok' ? '#3fb950' : 'var(--text-muted)';
+  if (isHtml) el.innerHTML = msg; else el.textContent = msg;
+}
+
+async function caseAction(reviewId, action) {
+  const def = RV_ACTIONS.find(a => a[0] === action);
+  if (!def) return;
+  const textEl = document.getElementById('caseText');
+  const text = textEl ? textEl.value.trim() : '';
+  if (def[5] && text.length < 5) { setCaseMsg('Please enter a reason of at least 5 characters for "' + def[2] + '".', 'error'); return; }
+  if (text.length > 500) { setCaseMsg('The reason must be at most 500 characters.', 'error'); return; }
+  if (action === 'APPROVE' && !confirm('Approve release of this refund?\n\nThe release is SIMULATED: the refund returns to normal processing and RefundGuard does not initiate any real payment.')) return;
+  if (action === 'REJECT' && !confirm('Reject this refund? It will be marked REJECTED and will not be released.')) return;
+  document.querySelectorAll('.rv-act').forEach(b => b.disabled = true);
+  setCaseMsg('<i class="fa-solid fa-spinner fa-spin"></i> Saving…', 'info', true);
+  let status = 0;
+  try {
+    const body = action === 'NOTE' ? { note: text } : { reason: text || null };
+    const r = await fetch(API + '/api/reviews/' + reviewId + '/' + def[1], {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    status = r.status;
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || ('HTTP ' + r.status));
+    showToast(d.message || 'Saved', (action === 'REJECT' || action === 'ESCALATE' || action === 'REQUEST_INFO') ? 'warn' : 'success');
+    await openCase(reviewId);
+    setCaseMsg(d.message || 'Saved', 'ok');
+    refreshReviewViews();
+  } catch (e) {
+    if (status === 409 || status === 403) {
+      // The case changed (or the rules forbid this): reload it so the buttons reflect the current state.
+      await openCase(reviewId);
+      loadReviewerDashboard();
+    } else {
+      document.querySelectorAll('.rv-act').forEach(b => b.disabled = false);
+    }
+    setCaseMsg('Not saved: ' + e.message, 'error');
+  }
+}
+
+// ── Operator / admin: flag a refund for review ──
+let flagRefundId = null;
+function openFlag(refundId) {
+  flagRefundId = refundId;
+  const rf = refundsById[refundId];
+  document.getElementById('flagInfo').innerHTML = rf
+    ? 'Refund <strong>#' + esc(rf.id) + '</strong> &middot; order <span style="font-family:monospace;">' + esc(rf.orderId) + '</span> &middot; <strong>' + inr(rf.amount) + '</strong> &middot; ' + pillHtml(rf.derivedStatus || 'REQUESTED')
+    : 'Refund <strong>#' + esc(refundId) + '</strong>';
+  document.getElementById('flagReason').value = '';
+  document.getElementById('flagMsg').textContent = '';
+  document.getElementById('flagBtn').disabled = false;
+  document.getElementById('flagModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('flagReason').focus(), 50);
+}
+
+async function submitFlag() {
+  const reason = document.getElementById('flagReason').value.trim();
+  const msg = document.getElementById('flagMsg'), btn = document.getElementById('flagBtn');
+  if (reason.length < 5) { msg.style.color = '#f85149'; msg.textContent = 'Please enter a reason of at least 5 characters.'; return; }
+  btn.disabled = true;
+  msg.style.color = 'var(--text-muted)'; msg.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting…';
+  try {
+    const r = await fetch(API + '/api/refunds/' + flagRefundId + '/review/submit', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || ('HTTP ' + r.status));
+    closeModal('flagModal');
+    showToast(d.message || 'Submitted for review', 'warn');
+    if (!document.getElementById('timelineModal').classList.contains('hidden') && currentRefundIdForTimeline === flagRefundId) showTimeline(flagRefundId);
+    refreshReviewViews();
+  } catch (e) {
+    msg.style.color = '#f85149'; msg.textContent = 'Not submitted: ' + e.message;
+    btn.disabled = false;
+  }
+}
+
+// ── Operator / admin: answer a request for more information ──
+async function resubmitFromPanel(reviewId, refundId) {
+  const text = (document.getElementById('resubmitText').value || '').trim();
+  const msg = document.getElementById('resubmitMsg'), btn = document.getElementById('resubmitBtn');
+  if (text.length < 5) { msg.style.color = '#f85149'; msg.textContent = 'Please add the requested information (at least 5 characters).'; return; }
+  btn.disabled = true;
+  msg.style.color = 'var(--text-muted)'; msg.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resubmitting…';
+  try {
+    const r = await fetch(API + '/api/reviews/' + reviewId + '/resubmit', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: text })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || ('HTTP ' + r.status));
+    showToast(d.message || 'Resubmitted', 'success');
+    await showTimeline(refundId);
+    refreshReviewViews();
+  } catch (e) {
+    msg.style.color = '#f85149'; msg.textContent = 'Not resubmitted: ' + e.message;
+    btn.disabled = false;
+  }
+}
+
+// ── Admin: Risk Analytics (all numbers come from /api/admin/risk/*) ──
+const RISK_COLORS = { LOW: '#388bfd', MEDIUM: '#d29922', HIGH: '#f85149', CRITICAL: '#b62324' };
+let riskPage = 0, riskTotalPages = 0, riskSearchTimer = null, currentRiskRefundId = null;
+
+function loadRiskAnalytics() {
+  if (!AUTH || !can('RISK_ANALYTICS_VIEW')) return;
+  loadRiskSummary();
+  loadRiskList();
+}
+
+async function loadRiskSummary() {
+  const ids = ['rk-assessed','rk-high','rk-mismatch','rk-pending','rk-policy','rk-outdated'];
+  const dist = document.getElementById('rkDist');
+  try {
+    const r = await fetch(API + '/api/admin/risk/summary');
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || r.status);
+    document.getElementById('rk-assessed').textContent = d.assessed;
+    document.getElementById('rk-assessed-sub').textContent = 'of ' + d.totalRefunds + ' refunds · ' + d.unassessed + ' not assessed';
+    document.getElementById('rk-high').textContent = d.highOrCritical;
+    document.getElementById('rk-high-sub').textContent = 'HIGH ' + d.distribution.HIGH + ' · CRITICAL ' + d.distribution.CRITICAL;
+    document.getElementById('rk-mismatch').textContent = d.amountMismatches;
+    document.getElementById('rk-pending').textContent = d.pendingReviews;
+    document.getElementById('rk-policy').textContent = d.policyViolations;
+    document.getElementById('rk-outdated').textContent = d.outdatedAssessments;
+    document.getElementById('rk-version').textContent = 'Current rules: ' + d.ruleVersion;
+    if (d.disclaimer) document.getElementById('rkDisclaimer').textContent = d.disclaimer;
+    const max = Math.max(1, d.assessed);
+    dist.innerHTML = ['CRITICAL','HIGH','MEDIUM','LOW'].map(l => {
+      const n = d.distribution[l] || 0, pct = Math.round(n * 1000 / max) / 10;
+      return '<div class="rk-bar-row"><div>' + pillHtml(l) + '</div>' +
+        '<div class="rk-bar-track" title="' + n + ' refund(s), ' + pct + '% of assessed"><div class="rk-bar-fill" style="width:' + pct + '%;background:' + RISK_COLORS[l] + ';"></div></div>' +
+        '<div style="text-align:right;"><strong>' + n + '</strong> <span style="color:var(--text-dim);font-size:10px;">' + esc(d.bands[l]) + '</span></div></div>';
+    }).join('') +
+      '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">' + (d.assessed === 0 ? 'No refund has been assessed yet. ' : '') +
+      d.unassessed + ' refund(s) not assessed yet. Holds: score &ge; ' + d.holdMinScore + (d.holdOnPolicyViolation ? ' or any policy violation' : '') +
+      ' (existing Hold-and-Release policy).</div>';
+  } catch (e) {
+    ids.forEach(id => document.getElementById(id).textContent = '—');
+    dist.innerHTML = '<div style="color:var(--accent-red);font-size:12px;"><i class="fa-solid fa-circle-xmark"></i> Could not load the risk summary: ' + esc(e.message) +
+      ' <button class="tbl-btn tbl-btn-blue" onclick="loadRiskSummary()">Retry</button></div>';
+  }
+}
+
+function riskFilterChanged() { riskPage = 0; loadRiskList(); }
+function riskSearchInput() { clearTimeout(riskSearchTimer); riskSearchTimer = setTimeout(riskFilterChanged, 350); }
+function riskPageMove(delta) {
+  const next = riskPage + delta;
+  if (next < 0 || (riskTotalPages && next >= riskTotalPages)) return;
+  riskPage = next; loadRiskList();
+}
+
+async function loadRiskList() {
+  if (!AUTH || !can('RISK_ANALYTICS_VIEW')) return;
+  const body = document.getElementById('rkBody');
+  body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading scored refunds…</td></tr>';
+  const p = new URLSearchParams({ page: riskPage, size: 20, sort: document.getElementById('rkSort').value, dir: 'desc' });
+  const val = id => document.getElementById(id).value.trim();
+  if (val('rkSearch')) p.set('q', val('rkSearch'));
+  if (val('rkLevel')) p.set('level', val('rkLevel'));
+  if (val('rkStatus')) p.set('status', val('rkStatus'));
+  if (val('rkFrom')) p.set('from', val('rkFrom'));
+  if (val('rkTo')) p.set('to', val('rkTo'));
+  if (document.getElementById('rkMismatch').checked) p.set('mismatch', 'true');
+  if (document.getElementById('rkPolicy').checked) p.set('policyViolation', 'true');
+  try {
+    const r = await fetch(API + '/api/admin/risk/refunds?' + p.toString());
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || r.status);
+    riskTotalPages = d.totalPages;
+    document.getElementById('rkCount').textContent = '(' + d.totalElements + ' refund' + (d.totalElements === 1 ? '' : 's') + ')';
+    document.getElementById('rkPageInfo').textContent = d.totalElements ? 'Page ' + (d.page + 1) + ' of ' + d.totalPages : '';
+    document.getElementById('rkPrev').disabled = d.page <= 0;
+    document.getElementById('rkNext').disabled = d.page + 1 >= d.totalPages;
+    if (!d.content.length) {
+      body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px;">' +
+        (d.totalElements === 0 && riskPage === 0 ? 'No refunds match the current filters.' : 'No more results.') + '</td></tr>';
+      return;
+    }
+    body.innerHTML = d.content.map(x => {
+      const score = x.assessed
+        ? '<strong style="font-size:14px;color:' + (RISK_COLORS[x.riskLevel] || 'inherit') + ';">' + x.riskScore + '</strong>' +
+          (x.outdated ? '<div style="font-size:10px;color:#d29922;" title="Scored with an older rule version or configuration">&#9888; outdated</div>' : '')
+        : '<span style="font-size:10px;color:var(--text-dim);">not assessed</span>';
+      return '<tr>' +
+        '<td style="font-family:monospace;font-size:11px;font-weight:600;">#' + x.refundId + '</td>' +
+        '<td style="font-family:monospace;font-size:11px;">' + esc(x.orderId || '—') + '</td>' +
+        '<td style="font-weight:600;">' + inr(x.amount) + ' <span style="font-size:10px;color:var(--text-muted);">' + esc(x.currency || '') + '</span>' +
+          (x.amountMismatch ? '<div style="font-size:10px;color:#f85149;">settled ' + inr(x.settledAmount) + '</div>' : '') + '</td>' +
+        '<td>' + pillHtml(String(x.status || 'REQUESTED')) + '</td>' +
+        '<td>' + score + '</td>' +
+        '<td>' + (x.assessed ? pillHtml(String(x.riskLevel)) : '—') + (x.policyViolation ? '<div style="margin-top:2px;"><span class="status-pill pill-red" title="Policy violation: held for reviewer approval"><i class="fa-solid fa-gavel"></i>POLICY</span></div>' : '') + '</td>' +
+        '<td style="font-size:11px;">' + (x.assessedAt ? fmtDate(x.assessedAt) : '—') + '</td>' +
+        '<td style="font-size:11px;color:var(--text-muted);max-width:320px;" title="' + esc(x.explanation) + '">' + esc((x.explanation || '').slice(0, 160)) + '</td>' +
+        '<td><button class="tbl-btn tbl-btn-blue" onclick="openRiskDetail(' + Number(x.refundId) + ')"><i class="fa-solid fa-magnifying-glass-chart"></i> View</button></td>' +
+      '</tr>';
+    }).join('');
+  } catch (e) {
+    document.getElementById('rkCount').textContent = '';
+    body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--accent-red);padding:20px;"><i class="fa-solid fa-circle-xmark"></i> Could not load scored refunds: ' + esc(e.message) +
+      ' <button class="tbl-btn tbl-btn-blue" onclick="loadRiskList()">Retry</button></td></tr>';
+  }
+}
+
+async function openRiskDetail(refundId) {
+  currentRiskRefundId = refundId;
+  document.getElementById('riskDetailModal').classList.remove('hidden');
+  document.getElementById('riskDetailTitle').textContent = 'Refund #' + refundId + ' · risk';
+  const box = document.getElementById('riskDetailBody');
+  box.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading risk details…</div>';
+  try {
+    const r = await fetch(API + '/api/admin/risk/refunds/' + refundId);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || ('HTTP ' + r.status));
+    if (currentRiskRefundId !== refundId) return;
+    box.innerHTML = riskDetailHtml(d);
+  } catch (e) {
+    box.innerHTML = '<div style="color:var(--accent-red);padding:12px;"><i class="fa-solid fa-circle-xmark"></i> Could not load risk details: ' + esc(e.message) +
+      ' <button class="tbl-btn tbl-btn-blue" onclick="openRiskDetail(' + Number(refundId) + ')">Retry</button></div>';
+  }
+}
+
+function riskDetailHtml(d) {
+  const rf = d.refund || {}, o = d.order || {}, a = d.assessment;
+  const reassess = can('RISK_ASSESS')
+    ? '<button class="tbl-btn tbl-btn-purple rv-action-btn" id="rkReassessBtn" onclick="riskReassess(' + Number(rf.id) + ')"><i class="fa-solid fa-rotate"></i> ' + (a ? 'Reassess now' : 'Assess now') + '</button>' : '';
+  const review = d.openReview
+    ? '<div class="rv-panel" style="border-left:3px solid #d29922;font-size:12px;">Open review case #' + esc(d.openReview.reviewId) + ' &middot; ' + reviewPill(d.openReview.status) +
+      (can('REVIEW_DECIDE') ? ' <button class="tbl-btn tbl-btn-orange" onclick="closeModal(\'riskDetailModal\');openCase(' + Number(d.openReview.reviewId) + ')">Open case</button>' : '') +
+      '<div style="color:var(--text-muted);margin-top:4px;">Release decisions are made only in the Hold-and-Release review workflow.</div></div>' : '';
+
+  let scorePanel;
+  if (!a) {
+    scorePanel = '<div class="rv-panel" style="font-size:12px;color:var(--text-muted);">This refund has not been assessed yet. ' + reassess + '</div>';
+  } else {
+    const col = RISK_COLORS[a.riskLevel] || '#8b949e';
+    const factors = (a.riskFactors || []).map(f => {
+      const ev = Object.entries(f.evidence || {}).map(([k, v]) => '<span><strong>' + esc(k) + ':</strong> ' + esc(v) + '</span>').join('');
+      return '<tr><td style="font-family:monospace;font-size:10px;">' + esc(f.code) + '</td>' +
+        '<td style="font-weight:700;color:' + col + ';">+' + esc(f.points) + '</td>' +
+        '<td style="font-size:12px;">' + esc(f.reason) + (f.policyViolation ? ' <span class="status-pill pill-red"><i class="fa-solid fa-gavel"></i>POLICY VIOLATION</span>' : '') + '</td>' +
+        '<td class="rk-evidence">' + (ev || '—') + '</td></tr>';
+    }).join('');
+    const sum = (a.riskFactors || []).reduce((s, f) => s + (Number(f.points) || 0), 0);
+    const ne = (a.notEvaluated || []).map(n => '<li>' + esc(n) + '</li>').join('');
+    scorePanel = '<div class="rv-panel" style="border-left:3px solid ' + col + ';">' +
+      '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
+        '<span style="font-size:34px;font-weight:800;color:' + col + ';">' + esc(a.riskScore) + '<span style="font-size:13px;color:var(--text-muted);">/100</span></span>' +
+        pillHtml(String(a.riskLevel)) + (a.policyViolation ? '<span class="status-pill pill-red"><i class="fa-solid fa-gavel"></i>POLICY VIOLATION</span>' : '') +
+        (a.wouldHold ? '<span class="status-pill pill-orange">meets hold policy</span>' : '') +
+        '<span style="font-size:10px;color:var(--text-dim);">' + esc(a.ruleVersion) + ' &middot; assessed ' + fmtDate(a.assessedAt) + ' &middot; trigger ' + esc(a.trigger || '') + '</span>' +
+        '<span style="flex:1"></span>' + reassess + '</div>' +
+      (a.stale ? '<div style="font-size:12px;color:#d29922;margin-bottom:6px;">&#9888; Outdated: ' + esc(a.staleReason) + '</div>' : '') +
+      '<div style="font-size:13px;margin-bottom:8px;">' + esc(a.riskDescription) + '</div>' +
+      '<div style="font-size:12px;margin-bottom:10px;"><strong>Recommended next action:</strong><ul style="margin:4px 0 0 18px;">' +
+        (a.recommendedActions || [a.recommendedAction]).map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' +
+      '<div class="section-title">Contributing factors <span style="font-size:10px;font-weight:400;color:var(--text-muted);">score = sum of points' + (sum > 100 ? ' (' + sum + '), capped at 100' : '') + '</span></div>' +
+      (factors ? '<div class="table-wrap" style="max-height:none;"><table><thead><tr><th>Rule</th><th>Points</th><th>Reason</th><th>Evidence (data used)</th></tr></thead><tbody>' + factors + '</tbody></table></div>'
+               : '<div style="font-size:12px;color:var(--text-muted);">No rule triggered by the available data.</div>') +
+      (ne ? '<div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Unknown / unavailable data (not counted as risk):</div><ul style="font-size:11px;margin:2px 0 0 18px;color:var(--text-muted);">' + ne + '</ul>' : '') +
+      '<div style="font-size:10px;color:var(--text-dim);margin-top:8px;">' + esc(a.disclaimer || d.disclaimer) + '</div></div>';
+  }
+
+  const refundPanel = '<div class="rv-panel"><div class="section-title">Refund &amp; payment data used</div>' + kvHtml([
+    ['Refund', '#' + esc(rf.id) + (rf.providerRefundId ? ' &middot; <span style="font-family:monospace;">' + esc(rf.providerRefundId) + '</span>' : '')],
+    ['Order', '<span style="font-family:monospace;">' + esc(rf.orderId) + '</span>' + (o.status ? ' ' + pillHtml(o.status) : '')],
+    ['Refund amount', '<strong>' + inr(rf.amount) + '</strong> ' + esc(rf.currency || '')],
+    ['Order amount', o.amount != null ? inr(o.amount) + ' ' + esc(o.currency || '') : 'Unavailable (no order record)'],
+    ['Customer', o.customerName ? esc(o.customerName) + (o.customerEmail ? ' &middot; ' + esc(o.customerEmail) : '') : ''],
+    ['Processing status', pillHtml(String(rf.derivedStatus || 'REQUESTED')) + ' <span style="font-size:10px;color:var(--text-muted);">status alone is not scored</span>'],
+    ['Payment method', esc(rf.paymentMethod)],
+    ['Requested', fmtDate(rf.requestedAt)],
+    ['Bank settlement', rf.settledAt ? fmtDate(rf.settledAt) + ' &middot; ' + inr(rf.settledAmount) + (rf.bankUtr ? ' &middot; UTR ' + esc(rf.bankUtr) : '') : 'Not settled yet']
+  ]) + settlementsHtml(d.settlements) + '</div>';
+
+  const hist = (d.history || []).map(h => '<tr><td>' + fmtDate(h.assessedAt) + '</td><td><strong>' + esc(h.riskScore) + '</strong></td><td>' + pillHtml(String(h.riskLevel)) +
+    '</td><td>' + esc(h.trigger || '') + '</td><td style="font-size:10px;">' + esc(h.ruleVersion) + '</td><td>' + (h.policyViolation ? 'yes' : '') + '</td></tr>').join('');
+  const histPanel = '<div class="rv-panel"><div class="section-title">Assessment history (latest 10)</div>' + (hist
+    ? '<div class="table-wrap" style="max-height:200px;"><table><thead><tr><th>Assessed</th><th>Score</th><th>Level</th><th>Trigger</th><th>Rules</th><th>Policy</th></tr></thead><tbody>' + hist + '</tbody></table></div>'
+    : '<div style="font-size:12px;color:var(--text-muted);">No assessments recorded.</div>') + '</div>';
+
+  return review + scorePanel + '<div class="two-col" style="margin-bottom:0;">' + refundPanel + histPanel + '</div>';
+}
+
+async function riskReassess(refundId) {
+  const btn = document.getElementById('rkReassessBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Assessing…'; }
+  try {
+    const r = await fetch(API + '/api/refunds/' + refundId + '/risk/reassess', { method: 'POST' });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || ('HTTP ' + r.status));
+    showToast((d.message || 'Reassessed') + ' Score ' + d.riskScore + ' (' + d.riskLevel + ')' + (d.heldNow ? ' - refund placed ON HOLD for review.' : ''), d.heldNow ? 'warn' : 'success');
+    await openRiskDetail(refundId);
+    loadRiskAnalytics(); loadRefunds(); loadReviews(); loadSummary();
+  } catch (e) {
+    showToast('Reassessment failed: ' + e.message, 'error');
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function assessUnassessed() {
+  if (!confirm('Assess every refund that has no risk assessment yet (max 500)?\n\nThis only calculates and stores scores; it never holds or releases a refund.')) return;
+  const btn = document.getElementById('rkBackfillBtn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(API + '/api/admin/risk/assess-unassessed', { method: 'POST' });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || ('HTTP ' + r.status));
+    showToast(d.message, 'success');
+    loadRiskAnalytics(); loadRefunds();
+  } catch (e) {
+    showToast('Assessment failed: ' + e.message, 'error');
+  } finally { btn.disabled = false; }
+}
+
+// ── Cases ──
+async function loadCases() {
+  try {
+    const r = await fetch(API + '/api/cases');
+    const cases = await r.json();
+    const tbody = document.getElementById('casesBody');
+    if (!cases.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--accent-green);padding:20px;"><i class="fa-solid fa-circle-check"></i> No discrepancy cases. All clear!</td></tr>';
+      return;
+    }
+    casesById = {};
+    cases.forEach(c => casesById[c.id] = c);
+    // Open cases first, newest first.
+    const sorted = cases.slice().sort((a, b) => ((a.status === 'OPEN') === (b.status === 'OPEN')) ? b.id - a.id : (a.status === 'OPEN' ? -1 : 1));
+    tbody.innerHTML = sorted.map(c => {
+      const issueType = c.issueType || 'DISCREPANCY';
+      const order = c.orderId || ('RFND-' + c.refundId);
+      const dateStr = c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-IN') : '—';
+      const src = (c.aiSource || 'RULES').startsWith('CLAUDE') ? '<i class="fa-solid fa-robot" title="Claude AI analysis" style="color:#8957e5;margin-right:4px;"></i>' : '';
+      return '<tr>' +
+        '<td style="font-family:monospace;font-size:11px;font-weight:600;">#' + c.id + '</td>' +
+        '<td style="font-family:monospace;font-size:11px;">' + (c.refundId ? '#' + c.refundId : 'no refund') + ' (' + esc(order) + ')</td>' +
+        '<td>' + pillHtml(issueType) + (c.compensationDue > 0 ? '<div style="font-size:10px;color:#f85149;margin-top:2px;">' + inr(c.compensationDue) + '</div>' : '') + '</td>' +
+        '<td>' + pillHtml(c.severity || 'MEDIUM') + '</td>' +
+        '<td>' + pillHtml(c.status || 'OPEN') + '</td>' +
+        '<td style="font-size:11px;color:var(--text-muted);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(c.aiRootCauseHypothesis) + '">' + src + esc(c.aiRootCauseHypothesis || '—') + '</td>' +
+        '<td>' + dateStr + '</td>' +
+        '<td><button class="tbl-btn tbl-btn-blue" onclick="showCaseDetail(' + c.id + ')"><i class="fa-solid fa-eye"></i> View</button></td>' +
+      '</tr>';
+    }).join('');
+  } catch(e) {
+    document.getElementById('casesBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--accent-red);">Error loading cases</td></tr>';
+  }
+}
+
+function showCaseDetail(id) {
+  const c = casesById[id];
+  if (!c) return;
+  const order = c.orderId || ('RFND-' + c.refundId);
+  const isOpen = c.status === 'OPEN';
+  const source = c.aiSource || 'RULES';
+  const sourceLabel = source.startsWith('CLAUDE') ? source : 'Built-in rules engine';
+  const block = (title, color, icon, text) => !text ? '' :
+    '<div style="background:var(--bg-card2);padding:12px;border-radius:6px;margin-bottom:12px;border-left:3px solid ' + color + ';">' +
+      '<div style="font-size:11px;font-weight:600;color:' + color + ';margin-bottom:4px;"><i class="fa-solid fa-' + icon + '"></i> ' + title + '</div>' +
+      '<div style="font-size:12px;color:var(--text-primary);white-space:pre-wrap;">' + esc(text) + '</div>' +
+    '</div>';
+  const btn = 'flex:1;padding:8px;border:none;color:white;border-radius:6px;font-weight:600;cursor:pointer;';
+  document.getElementById('receiverModalBody').innerHTML =
+    '<div style="padding:10px;">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">' +
+        '<span style="font-size:16px;font-weight:700;">Case #' + c.id + '</span>' +
+        pillHtml(c.severity || 'MEDIUM') + pillHtml(c.status || 'OPEN') +
+      '</div>' +
+      '<div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Order / Ref: <strong>' + esc(order) + '</strong> | Issue: <strong>' + esc(c.issueType) + '</strong>' +
+        (c.compensationDue > 0 ? ' | Est. compensation: <strong style="color:#f85149;">' + inr(c.compensationDue) + '</strong>' : '') + '</div>' +
+      block('Root Cause Hypothesis · ' + sourceLabel, 'var(--accent-orange)', 'robot', c.aiRootCauseHypothesis || 'Under investigation') +
+      block('Recommended Action', 'var(--accent-green)', 'list-check', c.recommendedAction) +
+      block('Draft Message to Customer', 'var(--accent-blue)', 'envelope', c.customerMessage) +
+      block('Resolution Notes', '#8b949e', 'note-sticky', c.resolutionNotes) +
+      (c.issueType === 'HIGH_RISK_REVIEW' && isOpen && c.refundId ? '<div style="margin-bottom:10px;"><button onclick="closeModal(\'receiverModal\');showTimeline(' + c.refundId + ')" style="padding:8px 12px;border:none;border-radius:6px;background:#d29922;color:white;font-weight:600;cursor:pointer;">Open review for refund #' + c.refundId + '</button></div>' : '') +
+      '<div id="caseActionMsg" style="font-size:11px;color:var(--text-muted);margin-bottom:8px;"></div>' +
+      '<div style="display:flex;gap:8px;">' +
+        (can('CASE_INVESTIGATE') ? '<button id="analyzeBtn" onclick="analyzeCase(' + c.id + ')" style="' + btn + 'background:#8957e5;"><i class="fa-solid fa-wand-magic-sparkles"></i> Analyze with AI</button>' : '') +
+        ((isOpen && can('CASE_RESOLVE') && c.issueType !== 'HIGH_RISK_REVIEW') ? '<button onclick="resolveCase(' + c.id + ')" style="' + btn + 'background:#2ea043;"><i class="fa-solid fa-check"></i> Mark Resolved</button>' : '') +
+        '<button onclick="closeModal(\'receiverModal\')" style="' + btn + 'background:var(--accent-blue);">Close</button>' +
+      '</div>' +
+    '</div>';
+  document.getElementById('receiverModal').classList.remove('hidden');
+}
+
+async function analyzeCase(id) {
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analysing…';
+  try {
+    const r = await fetch(API + '/api/cases/' + id + '/analyze', { method: 'POST' });
+    const d = await r.json();
+    if (d.case) casesById[id] = d.case;
+    showCaseDetail(id);
+    document.getElementById('caseActionMsg').textContent = d.message || '';
+    showToast(d.message || 'Analysis complete', (d.source || '').startsWith('CLAUDE') ? 'success' : 'warn');
+    loadCases();
+  } catch(e) {
+    showToast('Analysis failed: ' + e.message, 'error');
+    btn.disabled = false;
+  }
+}
+
+async function resolveCase(id) {
+  const notes = prompt('Resolution notes (what was done / bank confirmation):', 'Resolved by operator after banking confirmation');
+  if (notes === null) return;
+  try {
+    const r = await fetch(API + '/api/cases/' + id + '/resolve', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notes })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || r.status);
+    casesById[id] = d;
+    showCaseDetail(id);
+    showToast('Case #' + id + ' resolved', 'success');
+    loadCases(); loadSummary();
+  } catch(e) { showToast('Resolve failed: ' + e.message, 'error'); }
+}
+
+// ── CSV Upload ──
+async function uploadCSV() {
+  const file = document.getElementById('csvInput').files[0];
+  if (!file) return;
+  const form = new FormData();
+  form.append('file', file);
+  document.getElementById('csvResult').innerHTML = '<span style="color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Uploading ' + file.name + '...</span>';
+  try {
+    const r = await fetch(API + '/api/settlements/upload', { method: 'POST', body: form });
+    const d = await r.json();
+    if (r.ok) {
+      document.getElementById('csvResult').innerHTML = '<span style="color:var(--accent-green);"><i class="fa-solid fa-circle-check"></i> ' + (d.message || 'Reconciliation complete') + '</span>';
+      showToast('Settlement CSV processed successfully!', 'success');
+      loadRefunds(); loadCases(); loadSummary();
+    } else {
+      document.getElementById('csvResult').innerHTML = '<span style="color:var(--accent-red);"><i class="fa-solid fa-circle-xmark"></i> ' + (d.message || 'Upload failed') + '</span>';
+    }
+  } catch(e) {
+    document.getElementById('csvResult').innerHTML = '<span style="color:var(--accent-red);"><i class="fa-solid fa-circle-xmark"></i> Network error</span>';
+  }
+  document.getElementById('csvInput').value = '';
+}
+
+// ── Simulator Controls ──
+async function cancelOrder() {
+  const r = await fetch(API + '/api/simulator/cancel-order?orderId=ORD-9001', { method: 'POST' });
+  const d = await r.json();
+  document.getElementById('simResult').innerHTML = '<span style="color:var(--accent-green);"><i class="fa-solid fa-circle-check"></i> ' + (d.message || JSON.stringify(d)) + '</span>';
+  loadOrders(); loadRefunds(); loadSummary();
+  document.getElementById('receiverBanner').classList.remove('hidden');
+  showToast('Order ORD-9001 cancelled. Refund flow triggered.', 'warn');
+}
+
+async function dupTest() {
+  const r = await fetch(API + '/api/simulator/duplicate-test', { method: 'POST' });
+  const d = await r.json();
+  document.getElementById('simResult').innerHTML = '<span style="color:var(--accent-orange);"><i class="fa-solid fa-shield-halved"></i> Idempotency Test: ' + JSON.stringify(d) + '</span>';
+  showToast('Duplicate webhook blocked! Idempotency verified.', 'success');
+}
+
+async function checkOverdue() {
+  const r = await fetch(API + '/api/simulator/check-overdue', { method: 'POST' });
+  const d = await r.json();
+  document.getElementById('simResult').innerHTML = '<span style="color:var(--accent-blue);"><i class="fa-solid fa-clock"></i> ' + esc(d.message || JSON.stringify(d)) + '</span>';
+  showToast('RBI TAT SLA check complete.', 'success');
+  loadRefunds(); loadCases(); loadSummary();
+}
+
+function simOrder() { return document.getElementById('simOrderId').value.trim(); }
+
+async function simCall(url, icon, color) {
+  try {
+    const r = await fetch(API + url, { method: 'POST' });
+    const d = await r.json();
+    document.getElementById('simResult').innerHTML = '<span style="color:' + (r.ok ? color : 'var(--accent-red)') + ';"><i class="fa-solid fa-' + icon + '"></i> ' + esc(d.message || JSON.stringify(d)) + '</span>';
+    showToast(r.ok ? 'Done' : (d.message || 'Request failed'), r.ok ? 'success' : 'error');
+    loadOrders(); loadRefunds(); loadCases(); loadSummary();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+function ageRefundSim() {
+  const days = parseInt(document.getElementById('simDays').value, 10) || 1;
+  simCall('/api/simulator/age-refund?orderId=' + encodeURIComponent(simOrder()) + '&days=' + days, 'forward-fast', '#d29922');
+}
+function failRefundSim() {
+  simCall('/api/simulator/fail-refund?orderId=' + encodeURIComponent(simOrder()), 'circle-xmark', '#f85149');
+}
+function signedWebhookSim() {
+  simCall('/api/simulator/signed-webhook?orderId=' + encodeURIComponent(simOrder()), 'signature', 'var(--accent-green)');
+}
+
+// ── Reset DB ──
+async function resetDB() {
+  if (!confirm('Reset database and seed 3 demo orders?')) return;
+  try {
+    const r = await fetch(API + '/api/simulator/reset', { method: 'POST' });
+    showToast('Database reset & seeded with demo data!', 'success');
+    loadOrders(); loadRefunds(); loadCases(); loadSummary();
+    document.getElementById('simResult').innerHTML = '<span style="color:var(--accent-green);"><i class="fa-solid fa-database"></i> DB reset complete. 3 demo orders seeded.</span>';
+  } catch(e) { showToast('Reset failed: ' + e.message, 'error'); }
+}
+
+function showSupportModal() { document.getElementById('supportModal').classList.remove('hidden'); }
+function scrollToAlerts() {
+  if (can('REVIEW_DECIDE')) { showView('reviewer'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  const e = document.getElementById('reviewBody'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ── TPS/FPS Charts ──
+function initCharts() {
+  const labels = Array.from({length: 20}, (_,i) => i);
+  tpsData = Array.from({length:20}, () => 5000 + Math.random() * 800);
+  fpsData = Array.from({length:20}, () => 15 + Math.random() * 8);
+
+  const tpsCtx = document.getElementById('tpsChart').getContext('2d');
+  tpsChart = new Chart(tpsCtx, {
+    type: 'line',
+    data: { labels, datasets: [{ data: tpsData, borderColor: '#3fb950', backgroundColor: 'rgba(63,185,80,0.1)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0 }] },
+    options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { display: false }, y: { display: false } } }
+  });
+
+  const fpsCtx = document.getElementById('fpsChart').getContext('2d');
+  fpsChart = new Chart(fpsCtx, {
+    type: 'line',
+    data: { labels, datasets: [{ data: fpsData, borderColor: '#f85149', backgroundColor: 'rgba(248,81,73,0.1)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0 }] },
+    options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { display: false }, y: { display: false } } }
+  });
+}
+
+function updateCharts() {
+  const newTps = 5000 + Math.random() * 800;
+  const newFps = 15 + Math.random() * 8;
+  tpsData.push(newTps); tpsData.shift();
+  fpsData.push(newFps); fpsData.shift();
+  tpsChart.data.datasets[0].data = tpsData;
+  fpsChart.data.datasets[0].data = fpsData;
+  tpsChart.update('none');
+  fpsChart.update('none');
+  const tpsVal = Math.round(newTps).toLocaleString('en-IN');
+  const delta = ((newTps - 5200) / 5200 * 100).toFixed(1);
+  document.getElementById('tpsValue').textContent = tpsVal;
+  document.getElementById('tpsDelta').textContent = (delta >= 0 ? '▲ +' : '▼ ') + delta + '%';
+  document.getElementById('tpsDelta').className = 'chart-delta' + (delta >= 0 ? '' : ' neg');
+  const fDelta = ((newFps - 19) / 19 * 100).toFixed(2);
+  document.getElementById('fpsValue').textContent = newFps.toFixed(1);
+  document.getElementById('fpsDelta').textContent = (fDelta >= 0 ? '▲ +' : '▼ ') + fDelta + '%';
+  document.getElementById('fpsDelta').className = 'chart-delta' + (fDelta >= 0 ? '' : ' neg');
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  initCharts();
+  setInterval(updateCharts, 2000);
+  applyRole();          // hides permission-gated controls until someone signs in
+  showLogin();
+});
+</script>
+</body>
+</html>
